@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "8e21c5d5d52e44e68c429634cd564ca9"
-name = "QRCode"
+name = "QRCode-Adhurim Berisha"
 application_url = "https://example.com"
 embedded = true
 
@@ -48,5 +48,4 @@ api_version = "2026-10"
 redirect_urls = [ "https://example.com/api/auth" ]
 
 [build]
-include_config_on_deploy = true
 automatically_update_urls_on_dev = true
