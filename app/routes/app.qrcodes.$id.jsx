@@ -362,3 +362,7 @@ export default function QRCodeForm() {
     </>
   );
 }
+
+export const headers = (headersArgs) => {
+  return boundary.headers(headersArgs);
+};
