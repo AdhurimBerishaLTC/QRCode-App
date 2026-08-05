@@ -215,6 +215,15 @@ export default function QRCodeForm() {
                     Go to destination URL
                   </s-link>
                 ) : null}
+                {initialFormState.productId &&
+                !initialFormState.productDeleted &&
+                !initialFormState.onlineStoreUrl ? (
+                  <s-banner tone="warning">
+                    This product is not published to the Online Store sales
+                    channel, so the destination URL may show a 404. Publish the
+                    product in Admin, then save this QR code again.
+                  </s-banner>
+                ) : null}
               </s-stack>
               <s-stack gap="small-400">
                 <s-stack
@@ -340,15 +349,23 @@ export default function QRCodeForm() {
                 >
                   <s-button
                     disabled={!initialFormState.handle}
-                    href={`/qrcodes/${initialFormState.handle}?shop=${loaderData.shop}`}
-                    target="_blank"
+                    {...(initialFormState.handle
+                      ? {
+                          href: `/qrcodes/${initialFormState.handle}?shop=${loaderData.shop}`,
+                          target: "_blank",
+                        }
+                      : {})}
                   >
                     Go to public URL
                   </s-button>
                   <s-button
                     disabled={!initialFormState?.image}
-                    href={initialFormState?.image}
-                    download
+                    {...(initialFormState?.image
+                      ? {
+                          href: initialFormState.image,
+                          download: true,
+                        }
+                      : {})}
                     variant="primary"
                   >
                     Download

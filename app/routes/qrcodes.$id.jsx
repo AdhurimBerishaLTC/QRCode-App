@@ -1,40 +1,28 @@
-import invariant from "tiny-invariant";
 import { useLoaderData } from "react-router";
 
 import { unauthenticated } from "../shopify.server";
-import { getQRCodeImage } from "../models/QRCode.server";
+import { getQRCode } from "../models/QRCode.server";
 
 export const loader = async ({ request, params }) => {
-  invariant(params.id, "Could not find QR code destination");
+  if (!params.id) {
+    throw new Response("QR code not found", { status: 404 });
+  }
 
   const url = new URL(request.url);
   const shop = url.searchParams.get("shop");
-  invariant(shop, "Missing shop parameter");
+  if (!shop) {
+    throw new Response("Missing shop parameter", { status: 400 });
+  }
 
   const { admin } = await unauthenticated.admin(shop);
-
-  const response = await admin.graphql(
-    `
-            query GetQRCodeTitle($handle: MetaobjectHandleInput!) {
-                metaobjectByHandle(handle: $handle) {
-                    title: field(key: "title") { value }
-                }
-            }
-        `,
-    {
-      variables: {
-        handle: { type: "$app:qrcode", handle: params.id },
-      },
-    },
-  );
-
-  const { data } = await response.json();
-  const metaobject = data?.metaobjectByHandle;
-  invariant(metaobject, "Could not find QR code destination");
+  const qrCode = await getQRCode(params.id, admin.graphql, shop);
+  if (!qrCode) {
+    throw new Response("QR code not found", { status: 404 });
+  }
 
   return {
-    title: metaobject.title.value,
-    image: await getQRCodeImage(params.id, shop),
+    title: qrCode.title,
+    image: qrCode.image,
   };
 };
 

@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
-import { getQRCodes } from "app/models/QRCode.server";
+import { getQRCodes } from "../models/QRCode.server";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
