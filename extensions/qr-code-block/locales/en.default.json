@@ -1,0 +1,16 @@
+{
+  "share_qr": {
+    "subtitle": "Scan to open {{ title }}",
+    "share_text": "Check out {{ title }}",
+    "loading": "Generating QR code…",
+    "error": "Could not create QR code.",
+    "copied": "Copied",
+    "copy_error": "Could not copy link.",
+    "close": "Close",
+    "image_alt": "QR code for {{ title }}",
+    "native_share": "Share…",
+    "copy_link": "Copy link",
+    "download": "Download QR",
+    "missing": "No QR code exists for this product yet. Create one in the QR Code app first."
+  }
+}

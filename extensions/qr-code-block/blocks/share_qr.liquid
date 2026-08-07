@@ -1,0 +1,129 @@
+{% liquid
+  assign share_product = block.settings.product
+  if share_product == blank and product != blank
+    assign share_product = product
+  endif
+
+  assign qr_title = ''
+  assign scan_url = ''
+
+  if share_product != blank
+    for entry in shop.metaobjects['$app:qrcode'].values
+      assign entry_product = entry.product.value
+      if entry_product != blank and entry_product.id == share_product.id
+        assign qr_title = entry.title.value
+        assign qr_handle = entry.system.handle
+        assign scan_url = request.origin | append: '/apps/qrcodes/' | append: qr_handle | append: '/scan'
+        break
+      endif
+    endfor
+  endif
+
+  if qr_title == blank and share_product != blank
+    assign qr_title = share_product.title
+  endif
+%}
+
+{% if scan_url != blank %}
+  <div
+    class="qr-share"
+    {{ block.shopify_attributes }}
+    data-qr-share
+    data-share-url="{{ scan_url | escape }}"
+    data-product-title="{{ qr_title | escape }}"
+    data-share-text="{{ 'share_qr.share_text' | t: title: qr_title | escape }}"
+    data-loading-label="{{ 'share_qr.loading' | t | escape }}"
+    data-error-label="{{ 'share_qr.error' | t | escape }}"
+    data-copied-label="{{ 'share_qr.copied' | t | escape }}"
+    data-copy-error-label="{{ 'share_qr.copy_error' | t | escape }}"
+  >
+    <button type="button" class="qr-share__button" data-qr-open>
+      {{ block.settings.button_label }}
+    </button>
+
+    <dialog class="qr-share__dialog" data-qr-dialog aria-labelledby="qr-share-title-{{ block.id }}">
+      <div class="qr-share__panel">
+        <div class="qr-share__header">
+          <div>
+            <h2 class="qr-share__title" id="qr-share-title-{{ block.id }}">
+              {{ block.settings.modal_heading }}
+            </h2>
+            <p class="qr-share__subtitle">
+              {{ 'share_qr.subtitle' | t: title: qr_title }}
+            </p>
+          </div>
+          <button
+            type="button"
+            class="qr-share__close"
+            data-qr-close
+            aria-label="{{ 'share_qr.close' | t }}"
+          >
+            ×
+          </button>
+        </div>
+
+        <div class="qr-share__code">
+          <img
+            class="qr-share__image"
+            data-qr-image
+            alt="{{ 'share_qr.image_alt' | t: title: qr_title }}"
+            width="420"
+            height="420"
+            hidden
+          >
+          <p class="qr-share__status" data-qr-status></p>
+        </div>
+
+        <div class="qr-share__actions">
+          <button type="button" class="qr-share__action qr-share__action--primary" data-qr-native-share>
+            {{ 'share_qr.native_share' | t }}
+          </button>
+          <button type="button" class="qr-share__action" data-qr-copy>
+            {{ 'share_qr.copy_link' | t }}
+          </button>
+          <button type="button" class="qr-share__action" data-qr-download>
+            {{ 'share_qr.download' | t }}
+          </button>
+        </div>
+      </div>
+    </dialog>
+  </div>
+
+  <script src="{{ 'qrcode.min.js' | asset_url }}" defer></script>
+{% elsif request.design_mode %}
+  <div class="qr-share qr-share--empty" {{ block.shopify_attributes }}>
+    <p class="qr-share__empty">{{ 'share_qr.missing' | t }}</p>
+  </div>
+{% endif %}
+
+{% schema %}
+{
+  "name": "Share QR",
+  "target": "section",
+  "stylesheet": "share-qr.css",
+  "javascript": "share-qr.js",
+  "enabled_on": {
+    "templates": ["product"]
+  },
+  "settings": [
+    {
+      "type": "product",
+      "id": "product",
+      "label": "Product",
+      "autofill": true
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Share"
+    },
+    {
+      "type": "text",
+      "id": "modal_heading",
+      "label": "Modal heading",
+      "default": "Share this product"
+    }
+  ]
+}
+{% endschema %}
