@@ -1,6 +1,4 @@
 (() => {
-  const getQRCode = () => window.QRCode;
-
   const onReady = (callback) => {
     if (document.readyState === "loading") {
       document.addEventListener("DOMContentLoaded", callback);
@@ -14,52 +12,41 @@
     if (status) status.textContent = message || "";
   };
 
-  const waitForQrCode = async (tries = 0) => {
-    const QRCode = getQRCode();
-    if (QRCode && typeof QRCode.toDataURL === "function") {
-      return;
-    }
-    if (tries >= 40) {
-      throw new Error("QR library unavailable");
-    }
-    await new Promise((resolve) => window.setTimeout(resolve, 50));
-    return waitForQrCode(tries + 1);
-  };
-
-  const ensureQrImage = async (root) => {
-    await waitForQrCode();
-
+  const ensureQrImage = (root) => {
     const image = root.querySelector("[data-qr-image]");
-    const url = root.dataset.shareUrl;
-    const QRCode = getQRCode();
+    const imageUrl = root.dataset.imageUrl;
 
-    if (!image || !url) {
-      throw new Error("Missing QR share data");
+    if (!image || !imageUrl) {
+      return Promise.reject(new Error("Missing QR share data"));
     }
 
-    if (!QRCode?.toDataURL) {
-      throw new Error("QR library unavailable");
-    }
-
-    if (image.getAttribute("src")) {
-      return image;
+    if (image.getAttribute("src") === imageUrl && !image.hidden) {
+      return Promise.resolve(image);
     }
 
     setStatus(root, root.dataset.loadingLabel || "Generating QR code…");
 
-    const dataUrl = await QRCode.toDataURL(url, {
-      width: 420,
-      margin: 1,
-      color: {
-        dark: "#111111",
-        light: "#ffffff",
-      },
-    });
+    return new Promise((resolve, reject) => {
+      const onLoad = () => {
+        image.hidden = false;
+        setStatus(root, "");
+        cleanup();
+        resolve(image);
+      };
+      const onError = () => {
+        cleanup();
+        reject(new Error("Could not load QR image"));
+      };
+      const cleanup = () => {
+        image.removeEventListener("load", onLoad);
+        image.removeEventListener("error", onError);
+      };
 
-    image.src = dataUrl;
-    image.hidden = false;
-    setStatus(root, "");
-    return image;
+      image.addEventListener("load", onLoad);
+      image.addEventListener("error", onError);
+      image.src = imageUrl;
+      if (image.complete && image.naturalWidth > 0) onLoad();
+    });
   };
 
   const copyLink = async (root) => {
@@ -89,19 +76,25 @@
     }
   };
 
-  const downloadQr = (root, image) => {
+  const downloadQr = async (root, image) => {
     const title = root.dataset.productTitle || "product";
     const safeTitle = title
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/^-|-$/g, "");
 
+    const response = await fetch(image.src);
+    if (!response.ok) throw new Error("Download failed");
+    const blob = await response.blob();
+    const objectUrl = URL.createObjectURL(blob);
+
     const link = document.createElement("a");
-    link.href = image.src;
+    link.href = objectUrl;
     link.download = `${safeTitle || "product"}-qr-code.png`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(objectUrl);
   };
 
   const openDialog = (dialog) => {
@@ -161,7 +154,7 @@
     downloadButton?.addEventListener("click", async () => {
       try {
         const image = await ensureQrImage(root);
-        downloadQr(root, image);
+        await downloadQr(root, image);
       } catch {
         setStatus(root, root.dataset.errorLabel || "Could not create QR code.");
       }

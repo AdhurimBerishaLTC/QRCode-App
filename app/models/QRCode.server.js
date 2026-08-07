@@ -174,9 +174,27 @@ async function transformMetaobject(metaobject, shop) {
 }
 
 export async function getQRCodeImage(handle, shop) {
+  const url = getQRCodeScanUrl(handle, shop);
+  return qrcode.toDataURL(url.href);
+}
+
+export async function getQRCodePngBuffer(handle, shop) {
+  const url = getQRCodeScanUrl(handle, shop);
+  return qrcode.toBuffer(url.href, {
+    type: "png",
+    width: 420,
+    margin: 1,
+    color: {
+      dark: "#111111",
+      light: "#ffffff",
+    },
+  });
+}
+
+function getQRCodeScanUrl(handle, shop) {
   const url = new URL(`/qrcodes/${handle}/scan`, process.env.SHOPIFY_APP_URL);
   url.searchParams.set("shop", shop);
-  return qrcode.toDataURL(url.href);
+  return url;
 }
 
 function getVariantLegacyId(qrCode) {
