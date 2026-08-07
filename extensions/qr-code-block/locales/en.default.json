@@ -12,5 +12,9 @@
     "copy_link": "Copy link",
     "download": "Download QR",
     "missing": "No QR code exists for this product yet. Create one in the QR Code app first."
+  },
+  "qr_scan_banner": {
+    "default_message": "You opened this page by scanning a QR code",
+    "dismiss": "Dismiss"
   }
 }

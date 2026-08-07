@@ -1,0 +1,33 @@
+<div
+  class="qr-scan-banner"
+  data-qr-scan-banner
+  data-param="src"
+  data-param-value="qr"
+  data-message="{{ block.settings.message | escape }}"
+  data-dismiss-label="{{ block.settings.dismiss_label | escape }}"
+  {{ block.shopify_attributes }}
+  hidden
+></div>
+
+{% schema %}
+{
+  "name": "QR scan banner",
+  "target": "body",
+  "stylesheet": "qr_scan_banner.css",
+  "javascript": "qr_scan_banner.js",
+  "settings": [
+    {
+      "type": "text",
+      "id": "message",
+      "label": "Message",
+      "default": "You opened this page by scanning a QR code"
+    },
+    {
+      "type": "text",
+      "id": "dismiss_label",
+      "label": "Dismiss label",
+      "default": "Dismiss"
+    }
+  ]
+}
+{% endschema %}

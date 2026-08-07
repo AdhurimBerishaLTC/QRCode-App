@@ -201,6 +201,7 @@ export function getDestinationUrl(qrCode, shop) {
       if (variantId) {
         url.searchParams.set("variant", variantId);
       }
+      url.searchParams.set("src", "qr");
       return url.toString();
     }
 
@@ -209,11 +210,14 @@ export function getDestinationUrl(qrCode, shop) {
     if (variantId) {
       url.searchParams.set("variant", variantId);
     }
+    url.searchParams.set("src", "qr");
     return url.toString();
   }
 
   invariant(variantId, "Unrecognized product variant ID");
-  return `https://${shop}/cart/${variantId}:1`;
+  const cartUrl = new URL(`https://${shop}/cart/${variantId}:1`);
+  cartUrl.searchParams.set("src", "qr");
+  return cartUrl.toString();
 }
 
 export async function saveQRCode(handle, data, graphql) {
