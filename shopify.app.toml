@@ -7,7 +7,7 @@ embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,write_metaobjects,write_metaobject_definitions,write_app_proxy"
+scopes = "write_products,read_orders ,write_metaobjects,write_metaobject_definitions,write_app_proxy"
 
 [product.metafields.app.demo_info]
 type = "single_line_text_field"
@@ -62,6 +62,12 @@ api_version = "2026-10"
   [[webhooks.subscriptions]]
   uri = "/webhooks/app/scopes_update"
   topics = [ "app/scopes_update" ]
+
+  # Delivered to Google Pub/Sub.
+  # Grant delivery@shopify-pubsub-webhooks.iam.gserviceaccount.com Pub/Sub Publisher.
+  [[webhooks.subscriptions]]
+  topics = ["orders/create"]
+  uri = "pubsub://ltc-we:LTC-webhooks"
 
 [auth]
 redirect_urls = [ "https://example.com/api/auth" ]
