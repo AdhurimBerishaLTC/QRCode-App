@@ -351,7 +351,7 @@ export default function QRCodeForm() {
                     disabled={!initialFormState.handle}
                     {...(initialFormState.handle
                       ? {
-                          href: `/qrcodes/${initialFormState.handle}?shop=${loaderData.shop}`,
+                          href: `https://${loaderData.shop}/apps/qrcodes/${initialFormState.handle}`,
                           target: "_blank",
                         }
                       : {})}

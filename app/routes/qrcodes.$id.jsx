@@ -1,6 +1,6 @@
 import { useLoaderData } from "react-router";
 
-import { unauthenticated } from "../shopify.server";
+import { authenticate } from "../shopify.server";
 import { getQRCode } from "../models/QRCode.server";
 
 export const loader = async ({ request, params }) => {
@@ -8,13 +8,12 @@ export const loader = async ({ request, params }) => {
     throw new Response("QR code not found", { status: 404 });
   }
 
-  const url = new URL(request.url);
-  const shop = url.searchParams.get("shop");
-  if (!shop) {
-    throw new Response("Missing shop parameter", { status: 400 });
+  const { admin, session } = await authenticate.public.appProxy(request);
+  if (!admin || !session) {
+    throw new Response("App not installed on shop", { status: 401 });
   }
 
-  const { admin } = await unauthenticated.admin(shop);
+  const shop = session.shop;
   const qrCode = await getQRCode(params.id, admin.graphql, shop);
   if (!qrCode) {
     throw new Response("QR code not found", { status: 404 });

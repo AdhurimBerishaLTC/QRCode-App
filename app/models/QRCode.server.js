@@ -191,10 +191,17 @@ export async function getQRCodePngBuffer(handle, shop) {
   });
 }
 
+/**
+ * Storefront app-proxy URL so scans stay on the shop domain
+ * (`/apps/qrcodes/...` → app `/qrcodes/...` via [app_proxy] in shopify.app.toml).
+ */
+export function getQRCodePublicUrl(handle, shop, path = "") {
+  const suffix = path ? `/${path.replace(/^\//, "")}` : "";
+  return new URL(`/apps/qrcodes/${handle}${suffix}`, `https://${shop}`);
+}
+
 function getQRCodeScanUrl(handle, shop) {
-  const url = new URL(`/qrcodes/${handle}/scan`, process.env.SHOPIFY_APP_URL);
-  url.searchParams.set("shop", shop);
-  return url;
+  return getQRCodePublicUrl(handle, shop, "scan");
 }
 
 function getVariantLegacyId(qrCode) {
