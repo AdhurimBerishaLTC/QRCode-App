@@ -2,7 +2,12 @@ import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useState } from "preact/hooks";
 import { useSettings } from "@shopify/ui-extensions/customer-account/preact";
-import { Survey, settingString, useStorageState } from "./shared.jsx";
+import {
+  Survey,
+  settingString,
+  useRenderOnce,
+  useStorageState,
+} from "./shared.jsx";
 
 export default function () {
   render(<ProductReview />, document.body);
@@ -20,6 +25,11 @@ function ProductReview() {
     ? `product-reviewed:${orderValue.id}`
     : "product-reviewed";
   const [productReviewed, setProductReviewed] = useStorageState(storageKey);
+
+  const slotKey = orderValue?.id
+    ? `survey-once:order-status:${orderValue.id}`
+    : "survey-once:order-status";
+  const renderOnce = useRenderOnce(slotKey);
 
   // Settings win when set; otherwise fall back to locale defaults.
   const title = settingString(
@@ -61,7 +71,13 @@ function ProductReview() {
 
   // Always preview in the editor, even if storage says submitted.
   const inEditor = Boolean(shopify.extension.editor);
-  if (!inEditor && (productReviewed.loading || productReviewed.data === true)) {
+  if (
+    !inEditor &&
+    (renderOnce.loading ||
+      !renderOnce.shouldRender ||
+      productReviewed.loading ||
+      productReviewed.data === true)
+  ) {
     return null;
   }
 

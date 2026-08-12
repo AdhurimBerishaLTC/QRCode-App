@@ -2,7 +2,12 @@ import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useState } from "preact/hooks";
 import { useSettings } from "@shopify/ui-extensions/checkout/preact";
-import { Survey, settingString, useStorageState } from "./shared.jsx";
+import {
+  Survey,
+  settingString,
+  useRenderOnce,
+  useStorageState,
+} from "./shared.jsx";
 
 export default function () {
   render(<Attribution />, document.body);
@@ -10,12 +15,17 @@ export default function () {
 
 function Attribution() {
   const settings = useSettings();
-  const { i18n } = shopify;
+  const { i18n, checkoutToken } = shopify;
   const [attribution, setAttribution] = useState("");
   const [loading, setLoading] = useState(false);
   const [attributionSubmitted, setAttributionSubmitted] = useStorageState(
     "attribution-submitted",
   );
+
+  const slotKey = checkoutToken?.value
+    ? `survey-once:thank-you:${checkoutToken.value}`
+    : "survey-once:thank-you";
+  const renderOnce = useRenderOnce(slotKey);
 
   // Settings win when set; otherwise fall back to locale defaults.
   const title = settingString(
@@ -59,7 +69,10 @@ function Attribution() {
   const inEditor = Boolean(shopify.extension.editor);
   if (
     !inEditor &&
-    (attributionSubmitted.loading || attributionSubmitted.data === true)
+    (renderOnce.loading ||
+      !renderOnce.shouldRender ||
+      attributionSubmitted.loading ||
+      attributionSubmitted.data === true)
   ) {
     return null;
   }
