@@ -72,3 +72,57 @@ key = "collapsible"
 type = "boolean"
 name = "Show collapsible description."
 description = "Display controls to expand or collapse the banner description."
+
+[[extensions.settings.fields]]
+key = "attribution_title"
+type = "single_line_text_field"
+name = "Thank you survey title"
+description = "Question shown on the Thank you page survey."
+[[extensions.settings.fields]]
+key = "attribution_description"
+type = "single_line_text_field"
+name = "Thank you survey description"
+description = "Supporting text for the Thank you page survey."
+[[extensions.settings.fields]]
+key = "attribution_option_tv"
+type = "single_line_text_field"
+name = "Thank you option: TV"
+[[extensions.settings.fields]]
+key = "attribution_option_podcast"
+type = "single_line_text_field"
+name = "Thank you option: Podcast"
+[[extensions.settings.fields]]
+key = "attribution_option_family"
+type = "single_line_text_field"
+name = "Thank you option: Friend or family"
+[[extensions.settings.fields]]
+key = "attribution_option_tiktok"
+type = "single_line_text_field"
+name = "Thank you option: TikTok"
+
+[[extensions.settings.fields]]
+key = "review_title"
+type = "single_line_text_field"
+name = "Order status survey title"
+description = "Question shown on the Order status page survey."
+[[extensions.settings.fields]]
+key = "review_description"
+type = "single_line_text_field"
+name = "Order status survey description"
+description = "Supporting text for the Order status page survey."
+[[extensions.settings.fields]]
+key = "review_option_5"
+type = "single_line_text_field"
+name = "Order status option: Amazing"
+[[extensions.settings.fields]]
+key = "review_option_4"
+type = "single_line_text_field"
+name = "Order status option: Okay"
+[[extensions.settings.fields]]
+key = "review_option_3"
+type = "single_line_text_field"
+name = "Order status option: Eh"
+[[extensions.settings.fields]]
+key = "review_option_2"
+type = "single_line_text_field"
+name = "Order status option: Regret"

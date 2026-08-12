@@ -35,6 +35,16 @@ export function useStorageState(key) {
 }
 
 /**
+ * Reads a merchant setting as a string, falling back when unset.
+ * @param {unknown} value
+ * @param {string} fallback
+ * @returns {string}
+ */
+export function settingString(value, fallback) {
+  return typeof value === "string" && value.length > 0 ? value : fallback;
+}
+
+/**
  * @param {{
  *   title: string,
  *   description: string,

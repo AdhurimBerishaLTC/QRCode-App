@@ -1,24 +1,49 @@
+import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useState } from "preact/hooks";
-import { Survey, useStorageState } from "./shared.jsx";
+import { useSettings } from "@shopify/ui-extensions/customer-account/preact";
+import { Survey, settingString, useStorageState } from "./shared.jsx";
 
 export default function () {
   render(<ProductReview />, document.body);
 }
 
 function ProductReview() {
+  const settings = useSettings();
   const [productReview, setProductReview] = useState("");
   const [loading, setLoading] = useState(false);
-  // Store into local storage if the product was reviewed by the customer.
   const [productReviewed, setProductReviewed] =
     useStorageState("product-reviewed");
 
+  const title = settingString(
+    settings.review_title,
+    "How do you like your purchase?",
+  );
+  const description = settingString(
+    settings.review_description,
+    "We would like to learn if you are enjoying your purchase.",
+  );
+  const option5 = settingString(
+    settings.review_option_5,
+    "Amazing! Very happy with it.",
+  );
+  const option4 = settingString(
+    settings.review_option_4,
+    "It's okay, I expected more.",
+  );
+  const option3 = settingString(
+    settings.review_option_3,
+    "Eh. There are better options out there.",
+  );
+  const option2 = settingString(
+    settings.review_option_2,
+    "I regret the purchase.",
+  );
+
   async function handleSubmit() {
-    // Simulate a server request
     setLoading(true);
     return new Promise((resolve) => {
       setTimeout(() => {
-        // Send the review to the server
         console.log("Submitted:", productReview);
         setLoading(false);
         setProductReviewed(true);
@@ -26,15 +51,15 @@ function ProductReview() {
       }, 750);
     });
   }
-  // Hides the survey if the product has already been reviewed
+
   if (productReviewed.loading || productReviewed.data) {
     return null;
   }
 
   return (
     <Survey
-      title="How do you like your purchase?"
-      description="We would like to learn if you are enjoying your purchase."
+      title={title}
+      description={description}
       onSubmit={handleSubmit}
       loading={loading}
     >
@@ -49,10 +74,10 @@ function ProductReview() {
           setProductReview(target?.values?.[0] ?? "");
         }}
       >
-        <s-choice value="5">Amazing! Very happy with it.</s-choice>
-        <s-choice value="4">It&apos;s okay, I expected more.</s-choice>
-        <s-choice value="3">Eh. There are better options out there.</s-choice>
-        <s-choice value="2">I regret the purchase.</s-choice>
+        <s-choice value="5">{option5}</s-choice>
+        <s-choice value="4">{option4}</s-choice>
+        <s-choice value="3">{option3}</s-choice>
+        <s-choice value="2">{option2}</s-choice>
       </s-choice-list>
     </Survey>
   );
