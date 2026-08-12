@@ -1,8 +1,19 @@
 {
-  "welcome": "Bienvenue dans l'extension {{target}}!",
-  "iWouldLikeAFreeGiftWithMyOrder": "Je souhaite recevoir un cadeau gratuit avec ma commande",
-  "addAFreeGiftToMyOrder": "Ajouter un cadeau gratuit à ma commande",
-  "metafieldChangesAreNotSupported": "Les modifications de métachamps de panier ne sont pas prises en charge dans cette commande",
   "deliveryInstructionsCheckbox": "Ajouter des instructions de livraison",
-  "deliveryInstructions": "Instructions de livraison"
+  "deliveryInstructions": "Instructions de livraison",
+  "submitFeedback": "Envoyer mon avis",
+  "thanksForFeedback": "Merci pour votre avis !",
+  "responseSubmitted": "Votre réponse a été envoyée",
+  "attributionTitle": "Comment avez-vous entendu parler de nous ?",
+  "attributionDescription": "Nous aimerions savoir si vous appréciez votre achat.",
+  "attributionOptionTv": "Télévision",
+  "attributionOptionPodcast": "Podcast",
+  "attributionOptionFamily": "Par un ami ou un membre de la famille",
+  "attributionOptionTiktok": "TikTok",
+  "reviewTitle": "Que pensez-vous de votre achat ?",
+  "reviewDescription": "Nous aimerions savoir si vous appréciez votre achat.",
+  "reviewOption5": "Génial ! J'en suis très content.",
+  "reviewOption4": "C'est correct, j'attendais mieux.",
+  "reviewOption3": "Bof. Il y a de meilleures options.",
+  "reviewOption2": "Je regrette cet achat."
 }

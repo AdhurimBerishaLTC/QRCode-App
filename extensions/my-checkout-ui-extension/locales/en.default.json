@@ -1,8 +1,19 @@
 {
-  "welcome": "Welcome to the {{target}} extension!",
-  "iWouldLikeAFreeGiftWithMyOrder": "I would like to receive a free gift with my order",
-  "addAFreeGiftToMyOrder": "Add a free gift to my order",
-  "metafieldChangesAreNotSupported": "Cart metafield changes are not supported in this checkout",
   "deliveryInstructionsCheckbox": "Add delivery instructions",
-  "deliveryInstructions": "Delivery instructions"
+  "deliveryInstructions": "Delivery instructions",
+  "submitFeedback": "Submit feedback",
+  "thanksForFeedback": "Thanks for your feedback!",
+  "responseSubmitted": "Your response has been submitted",
+  "attributionTitle": "How did you hear about us?",
+  "attributionDescription": "We would like to learn if you are enjoying your purchase.",
+  "attributionOptionTv": "TV",
+  "attributionOptionPodcast": "Podcast",
+  "attributionOptionFamily": "From a friend or family member",
+  "attributionOptionTiktok": "Tiktok",
+  "reviewTitle": "How do you like your purchase?",
+  "reviewDescription": "We would like to learn if you are enjoying your purchase.",
+  "reviewOption5": "Amazing! Very happy with it.",
+  "reviewOption4": "It's okay, I expected more.",
+  "reviewOption3": "Eh. There are better options out there.",
+  "reviewOption2": "I regret the purchase."
 }

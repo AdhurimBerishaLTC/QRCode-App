@@ -10,32 +10,37 @@ export default function () {
 
 function Attribution() {
   const settings = useSettings();
+  const { i18n } = shopify;
   const [attribution, setAttribution] = useState("");
   const [loading, setLoading] = useState(false);
   const [attributionSubmitted, setAttributionSubmitted] = useStorageState(
     "attribution-submitted",
   );
 
+  // Settings win when set; otherwise fall back to locale defaults.
   const title = settingString(
     settings.attribution_title,
-    "How did you hear about us?",
+    i18n.translate("attributionTitle"),
   );
   const description = settingString(
     settings.attribution_description,
-    "We would like to learn if you are enjoying your purchase.",
+    i18n.translate("attributionDescription"),
   );
-  const optionTv = settingString(settings.attribution_option_tv, "TV");
+  const optionTv = settingString(
+    settings.attribution_option_tv,
+    i18n.translate("attributionOptionTv"),
+  );
   const optionPodcast = settingString(
     settings.attribution_option_podcast,
-    "Podcast",
+    i18n.translate("attributionOptionPodcast"),
   );
   const optionFamily = settingString(
     settings.attribution_option_family,
-    "From a friend or family member",
+    i18n.translate("attributionOptionFamily"),
   );
   const optionTiktok = settingString(
     settings.attribution_option_tiktok,
-    "Tiktok",
+    i18n.translate("attributionOptionTiktok"),
   );
 
   async function handleSubmit() {

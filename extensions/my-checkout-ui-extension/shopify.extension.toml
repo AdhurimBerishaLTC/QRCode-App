@@ -21,11 +21,11 @@ module = "./src/Checkout.jsx"
 
 [[extensions.targeting]]
 module = "./src/ThankYouPageSurvey.jsx"
-target = "purchase.thank-you.block.render"
+target = "purchase.thank-you.customer-information.render-after"
 
 [[extensions.targeting]]
 module = "./src/OrderStatusPageSurvey.jsx"
-target = "customer-account.order-status.block.render"
+target = "customer-account.order-status.customer-information.render-after"
 
 [[extensions.metafields]]
 namespace = "custom"
@@ -81,7 +81,7 @@ description = "Display controls to expand or collapse the banner description."
 key = "attribution_title"
 type = "single_line_text_field"
 name = "Thank you survey title"
-description = "Question shown on the Thank you page survey."
+description = "Question shown on the Thank you page survey. Leave blank to use the default."
 [[extensions.settings.fields]]
 key = "attribution_description"
 type = "single_line_text_field"
@@ -108,7 +108,7 @@ name = "Thank you option: TikTok"
 key = "review_title"
 type = "single_line_text_field"
 name = "Order status survey title"
-description = "Question shown on the Order status page survey."
+description = "Question shown on the Order status page survey. Leave blank to use the default."
 [[extensions.settings.fields]]
 key = "review_description"
 type = "single_line_text_field"

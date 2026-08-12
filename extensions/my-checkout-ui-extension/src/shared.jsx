@@ -54,6 +54,7 @@ export function settingString(value, fallback) {
  * }} props
  */
 export function Survey({ title, description, onSubmit, children, loading }) {
+  const { i18n } = shopify;
   const [submitted, setSubmitted] = useState(false);
 
   async function handleSubmit() {
@@ -65,8 +66,8 @@ export function Survey({ title, description, onSubmit, children, loading }) {
     return (
       <s-box border="base" padding="base" borderRadius="base">
         <s-stack gap="base">
-          <s-heading>Thanks for your feedback!</s-heading>
-          <s-text>Your response has been submitted</s-text>
+          <s-heading>{i18n.translate("thanksForFeedback")}</s-heading>
+          <s-text>{i18n.translate("responseSubmitted")}</s-text>
         </s-stack>
       </s-box>
     );
@@ -79,7 +80,7 @@ export function Survey({ title, description, onSubmit, children, loading }) {
         <s-text>{description}</s-text>
         {children}
         <s-button variant="secondary" onClick={handleSubmit} loading={loading}>
-          Submit feedback
+          {i18n.translate("submitFeedback")}
         </s-button>
       </s-stack>
     </s-box>

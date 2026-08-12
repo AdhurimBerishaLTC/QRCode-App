@@ -10,39 +10,41 @@ export default function () {
 
 function ProductReview() {
   const settings = useSettings();
-  const order = shopify.order.value;
+  const { i18n, order } = shopify;
+  const orderValue = order.value;
   const [productReview, setProductReview] = useState("");
   const [loading, setLoading] = useState(false);
 
   // Scope by order so a previous submit doesn't hide the survey on every order.
-  const storageKey = order?.id
-    ? `product-reviewed:${order.id}`
+  const storageKey = orderValue?.id
+    ? `product-reviewed:${orderValue.id}`
     : "product-reviewed";
   const [productReviewed, setProductReviewed] = useStorageState(storageKey);
 
+  // Settings win when set; otherwise fall back to locale defaults.
   const title = settingString(
     settings.review_title,
-    "How do you like your purchase?",
+    i18n.translate("reviewTitle"),
   );
   const description = settingString(
     settings.review_description,
-    "We would like to learn if you are enjoying your purchase.",
+    i18n.translate("reviewDescription"),
   );
   const option5 = settingString(
     settings.review_option_5,
-    "Amazing! Very happy with it.",
+    i18n.translate("reviewOption5"),
   );
   const option4 = settingString(
     settings.review_option_4,
-    "It's okay, I expected more.",
+    i18n.translate("reviewOption4"),
   );
   const option3 = settingString(
     settings.review_option_3,
-    "Eh. There are better options out there.",
+    i18n.translate("reviewOption3"),
   );
   const option2 = settingString(
     settings.review_option_2,
-    "I regret the purchase.",
+    i18n.translate("reviewOption2"),
   );
 
   async function handleSubmit() {
