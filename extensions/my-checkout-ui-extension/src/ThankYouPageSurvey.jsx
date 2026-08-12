@@ -50,7 +50,12 @@ function Attribution() {
     });
   }
 
-  if (attributionSubmitted.loading || attributionSubmitted.data === true) {
+  // Always preview in the editor, even if storage says submitted.
+  const inEditor = Boolean(shopify.extension.editor);
+  if (
+    !inEditor &&
+    (attributionSubmitted.loading || attributionSubmitted.data === true)
+  ) {
     return null;
   }
 

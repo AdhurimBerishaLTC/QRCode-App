@@ -10,10 +10,15 @@ export default function () {
 
 function ProductReview() {
   const settings = useSettings();
+  const order = shopify.order.value;
   const [productReview, setProductReview] = useState("");
   const [loading, setLoading] = useState(false);
-  const [productReviewed, setProductReviewed] =
-    useStorageState("product-reviewed");
+
+  // Scope by order so a previous submit doesn't hide the survey on every order.
+  const storageKey = order?.id
+    ? `product-reviewed:${order.id}`
+    : "product-reviewed";
+  const [productReviewed, setProductReviewed] = useStorageState(storageKey);
 
   const title = settingString(
     settings.review_title,
@@ -52,7 +57,9 @@ function ProductReview() {
     });
   }
 
-  if (productReviewed.loading || productReviewed.data) {
+  // Always preview in the editor, even if storage says submitted.
+  const inEditor = Boolean(shopify.extension.editor);
+  if (!inEditor && (productReviewed.loading || productReviewed.data === true)) {
     return null;
   }
 

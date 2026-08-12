@@ -19,6 +19,12 @@ declare module './src/OrderStatusPageSurvey.jsx' {
 }
 
 //@ts-ignore
+declare module './src/Fields.jsx' {
+  const shopify: import('@shopify/ui-extensions/purchase.checkout.shipping-option-list.render-after').Api;
+  const globalThis: { shopify: typeof shopify };
+}
+
+//@ts-ignore
 declare module './src/shared.jsx' {
   const shopify:
     | import('@shopify/ui-extensions/purchase.thank-you.block.render').Api

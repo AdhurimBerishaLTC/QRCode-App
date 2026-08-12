@@ -27,6 +27,18 @@ target = "purchase.thank-you.block.render"
 module = "./src/OrderStatusPageSurvey.jsx"
 target = "customer-account.order-status.block.render"
 
+[[extensions.targeting]]
+module = "./src/Fields.jsx"
+target = "purchase.checkout.shipping-option-list.render-after"
+
+[[extensions.targeting.metafields]]
+namespace = "custom"
+key = "deliveryinstructions"
+
+[[extensions.metafields]]
+namespace = "custom"
+key = "deliveryinstructions"
+
 [extensions.capabilities]
 # Gives your extension access to directly query Shopify’s storefront API.
 # https://shopify.dev/docs/api/checkout-ui-extensions/latest/configuration#api-access

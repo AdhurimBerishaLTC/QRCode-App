@@ -6,7 +6,6 @@ export default async () => {
 };
 
 function Extension() {
-  // Use the merchant-defined settings to retrieve the extension's content
   const {
     heading: merchantHeading,
     description,
@@ -20,7 +19,6 @@ function Extension() {
     return null;
   }
 
-  // Settings values are typed as string | number | boolean; narrow for banner props
   const tone =
     merchantTone === "info" ||
     merchantTone === "auto" ||
