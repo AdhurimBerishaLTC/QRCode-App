@@ -1,6 +1,7 @@
 import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { DeliveryInstructions } from "./DeliveryInstructions.jsx";
+import { AttributionSurvey } from "./AttributionSurvey.jsx";
 
 export default async () => {
   render(<Extension />, document.body);
@@ -14,15 +15,8 @@ function Extension() {
     tone: merchantTone,
   } = shopify.settings.value;
 
-  const inEditor = Boolean(shopify.extension.editor);
   const hasBanner =
     typeof merchantHeading === "string" && merchantHeading.length > 0;
-
-  // Dev preview can inject an extra unconfigured instance alongside the
-  // merchant-placed block. Skip that ghost on the storefront.
-  if (!hasBanner && !inEditor) {
-    return null;
-  }
 
   const tone =
     merchantTone === "info" ||
@@ -48,6 +42,7 @@ function Extension() {
         </s-banner>
       )}
       <DeliveryInstructions />
+      <AttributionSurvey />
     </s-stack>
   );
 }

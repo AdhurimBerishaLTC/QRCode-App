@@ -1,5 +1,3 @@
-import "@shopify/ui-extensions/preact";
-import { render } from "preact";
 import { useState } from "preact/hooks";
 import { useSettings } from "@shopify/ui-extensions/checkout/preact";
 import {
@@ -9,25 +7,30 @@ import {
   useStorageState,
 } from "./shared.jsx";
 
-export default function () {
-  render(<Attribution />, document.body);
-}
+const METAFIELD_NAMESPACE = "custom";
+const METAFIELD_KEY = "sale_attribution";
 
-function Attribution() {
+/**
+ * "How did you hear about us?" survey on checkout.
+ * Saves to a cart metafield that can copy onto the order (no backend URL).
+ */
+export function AttributionSurvey() {
   const settings = useSettings();
-  const { i18n, checkoutToken } = shopify;
+  const { applyMetafieldChange, i18n, checkoutToken } = shopify;
   const [attribution, setAttribution] = useState("");
   const [loading, setLoading] = useState(false);
-  const [attributionSubmitted, setAttributionSubmitted] = useStorageState(
-    "attribution-submitted",
-  );
+
+  const storageKey = checkoutToken?.value
+    ? `attribution-submitted:${checkoutToken.value}`
+    : "attribution-submitted";
+  const [attributionSubmitted, setAttributionSubmitted] =
+    useStorageState(storageKey);
 
   const slotKey = checkoutToken?.value
-    ? `survey-once:thank-you:${checkoutToken.value}`
-    : "survey-once:thank-you";
+    ? `survey-once:checkout-attribution:${checkoutToken.value}`
+    : "survey-once:checkout-attribution";
   const renderOnce = useRenderOnce(slotKey);
 
-  // Settings win when set; otherwise fall back to locale defaults.
   const title = settingString(
     settings.attribution_title,
     i18n.translate("attributionTitle"),
@@ -53,19 +56,54 @@ function Attribution() {
     i18n.translate("attributionOptionTiktok"),
   );
 
-  async function handleSubmit() {
-    setLoading(true);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("Submitted:", attribution);
-        setLoading(false);
-        setAttributionSubmitted(true);
-        resolve(undefined);
-      }, 750);
-    });
+  const attributionLabels = {
+    tv: optionTv,
+    podcast: optionPodcast,
+    family: optionFamily,
+    tiktok: optionTiktok,
+  };
+
+  /**
+   * @param {string} key
+   * @returns {string}
+   */
+  function answerLabelFor(key) {
+    if (key === "tv" || key === "podcast" || key === "family" || key === "tiktok") {
+      return attributionLabels[key];
+    }
+    return key;
   }
 
-  // Always preview in the editor, even if storage says submitted.
+  async function handleSubmit() {
+    if (!attribution) {
+      throw new Error("Select an answer before submitting.");
+    }
+
+    setLoading(true);
+    try {
+      const answerLabel = answerLabelFor(attribution);
+      const result = await applyMetafieldChange({
+        type: "updateCartMetafield",
+        metafield: {
+          namespace: METAFIELD_NAMESPACE,
+          key: METAFIELD_KEY,
+          type: "single_line_text_field",
+          value: answerLabel,
+        },
+      });
+
+      if (result.type === "error") {
+        console.error("Failed to save attribution", result.message);
+        throw new Error(result.message ?? "Failed to save attribution");
+      }
+
+      console.log("Saved sale_attribution cart metafield:", answerLabel);
+      setAttributionSubmitted(true);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   const inEditor = Boolean(shopify.extension.editor);
   if (
     !inEditor &&

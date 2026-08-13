@@ -161,8 +161,12 @@ export function Survey({ title, description, onSubmit, children, loading }) {
   const [submitted, setSubmitted] = useState(false);
 
   async function handleSubmit() {
-    await onSubmit();
-    setSubmitted(true);
+    try {
+      await onSubmit();
+      setSubmitted(true);
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   if (submitted) {
