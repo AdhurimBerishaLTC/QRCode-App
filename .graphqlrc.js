@@ -4,15 +4,18 @@ import { shopifyApiProject, ApiType } from "@shopify/api-codegen-preset";
 function getConfig() {
   const config = {
     projects: {
-      default: shopifyApiProject({
-        apiType: ApiType.Admin,
-        apiVersion: ApiVersion.July26,
-        documents: [
-          "./app/**/*.{js,ts,jsx,tsx}",
-          "./app/.server/**/*.{js,ts,jsx,tsx}",
-        ],
-        outputDir: "./app/types",
-      }),
+      default: {
+        ...shopifyApiProject({
+          apiType: ApiType.Admin,
+          apiVersion: ApiVersion.July26,
+          documents: [
+            "./app/**/*.{js,ts,jsx,tsx}",
+            "./app/.server/**/*.{js,ts,jsx,tsx}",
+          ],
+          outputDir: "./app/types",
+        }),
+        exclude: ["./extensions/**"],
+      },
     },
   };
   let extensions = [];
@@ -30,6 +33,7 @@ function getConfig() {
     config.projects[entry] = {
       schema,
       documents: [`${extensionPath}/**/*.graphql`],
+      include: [`${extensionPath}/**`],
     };
   }
   return config;
