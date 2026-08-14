@@ -1,7 +1,7 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "8e21c5d5d52e44e68c429634cd564ca9"
-name = "QRCode-Adhurim Berisha"
+name = "Adhurim Store Lab"
 application_url = "https://example.com"
 embedded = true
 

@@ -1,5 +1,5 @@
 {
-  "name": "qr-code",
+  "name": "adhurim-store-lab",
   "private": true,
   "scripts": {
     "build": "react-router build",
