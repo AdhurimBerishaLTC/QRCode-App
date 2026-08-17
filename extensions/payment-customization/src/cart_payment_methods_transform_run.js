@@ -7,11 +7,7 @@
 
 const NO_CHANGES = { operations: [] };
 
-const DEFAULTS = {
-  cartTotal: 100,
-  paymentMethodName: "Cash on Delivery",
-};
-
+/** @type {Record<string, string[]>} */
 const PAYMENT_METHOD_ALIASES = {
   "credit card": ["credit card", "credit/debit", "bogus gateway"],
 };
@@ -39,7 +35,10 @@ function matchesConfiguredMethod(methodName, configuredName) {
  * @returns {CartPaymentMethodsTransformRunResult}
  */
 export function cartPaymentMethodsTransformRun(input) {
-  const config = input.paymentCustomization.metafield?.jsonValue ?? DEFAULTS;
+  const config = input.paymentCustomization.metafield?.jsonValue;
+  if (!config?.paymentMethodName || config.cartTotal == null) {
+    return NO_CHANGES;
+  }
 
   const cartTotal = parseFloat(input.cart.cost.totalAmount.amount ?? "0.0");
   if (!(cartTotal > config.cartTotal)) {
