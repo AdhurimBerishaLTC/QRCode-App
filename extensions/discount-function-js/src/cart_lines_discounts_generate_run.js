@@ -29,6 +29,11 @@ export function cartLinesDiscountsGenerateRun(input) {
     return { operations: [] };
   }
 
+  const customer = input.cart.buyerIdentity?.customer;
+  if (!customer || customer.qrDiscountRedeemed?.jsonValue === true) {
+    return { operations: [] };
+  }
+
   if (!input.cart.lines.length) {
     return { operations: [] };
   }

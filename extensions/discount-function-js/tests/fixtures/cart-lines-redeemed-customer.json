@@ -9,7 +9,9 @@
         },
         "buyerIdentity": {
           "customer": {
-            "qrDiscountRedeemed": null
+            "qrDiscountRedeemed": {
+              "jsonValue": true
+            }
           }
         },
         "lines": [
@@ -24,7 +26,7 @@
         ]
       },
       "discount": {
-        "discountClasses": ["PRODUCT"],
+        "discountClasses": ["ORDER"],
         "metafield": null
       }
     },

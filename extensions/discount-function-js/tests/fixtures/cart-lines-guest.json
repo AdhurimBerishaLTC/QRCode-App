@@ -7,11 +7,7 @@
         "attribute": {
           "value": "qr"
         },
-        "buyerIdentity": {
-          "customer": {
-            "qrDiscountRedeemed": null
-          }
-        },
+        "buyerIdentity": null,
         "lines": [
           {
             "id": "gid://shopify/CartLine/0",
@@ -24,7 +20,7 @@
         ]
       },
       "discount": {
-        "discountClasses": ["PRODUCT"],
+        "discountClasses": ["ORDER"],
         "metafield": null
       }
     },

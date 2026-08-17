@@ -12,12 +12,15 @@
  *   GOOGLE_CLOUD_PROJECT            — GCP project ID
  *   PUBSUB_SUBSCRIPTION             — pull subscription ID (required)
  *   GOOGLE_APPLICATION_CREDENTIALS  — path to service account JSON key
+ *   DATABASE_URL                    — Prisma DB with Session table (optional; defaults via schema)
  */
 
 import { PubSub } from "@google-cloud/pubsub";
+import { PrismaClient } from "@prisma/client";
 
 const subscriptionNameOrId = process.env.PUBSUB_SUBSCRIPTION;
 const projectId = process.env.GOOGLE_CLOUD_PROJECT;
+const apiVersion = process.env.SHOPIFY_API_VERSION || "2026-07";
 
 if (!subscriptionNameOrId) {
   console.error(
@@ -26,13 +29,103 @@ if (!subscriptionNameOrId) {
   process.exit(1);
 }
 
-const pubSubClient = new PubSub(
-  projectId ? { projectId } : undefined,
-);
-
+const prisma = new PrismaClient();
+const pubSubClient = new PubSub(projectId ? { projectId } : undefined);
 const subscription = pubSubClient.subscription(subscriptionNameOrId);
 
-function processOrderCreate(payload, attributes) {
+function hasQrDiscount(payload) {
+  return (payload?.discount_applications ?? []).some((application) =>
+    String(application?.title ?? "")
+      .toLowerCase()
+      .includes("qr scan"),
+  );
+}
+
+function getCustomerGid(payload) {
+  if (payload?.customer?.admin_graphql_api_id) {
+    return payload.customer.admin_graphql_api_id;
+  }
+
+  if (payload?.customer?.id) {
+    return `gid://shopify/Customer/${payload.customer.id}`;
+  }
+
+  return null;
+}
+
+async function getOfflineAccessToken(shop) {
+  const session =
+    (await prisma.session.findUnique({
+      where: { id: `offline_${shop}` },
+    })) ??
+    (await prisma.session.findFirst({
+      where: {
+        shop,
+        isOnline: false,
+      },
+      orderBy: {
+        id: "desc",
+      },
+    }));
+
+  if (!session?.accessToken) {
+    throw new Error(`No offline session found for shop ${shop}`);
+  }
+
+  return session.accessToken;
+}
+
+async function markQrDiscountRedeemed(shop, customerId) {
+  const accessToken = await getOfflineAccessToken(shop);
+  const response = await fetch(
+    `https://${shop}/admin/api/${apiVersion}/graphql.json`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Access-Token": accessToken,
+      },
+      body: JSON.stringify({
+        query: `#graphql
+          mutation MarkQrDiscountRedeemed($metafields: [MetafieldsSetInput!]!) {
+            metafieldsSet(metafields: $metafields) {
+              metafields {
+                key
+                value
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }`,
+        variables: {
+          metafields: [
+            {
+              ownerId: customerId,
+              key: "qr_discount_redeemed",
+              type: "boolean",
+              value: "true",
+            },
+          ],
+        },
+      }),
+    },
+  );
+
+  const responseJson = await response.json();
+  const errors = responseJson.data?.metafieldsSet?.userErrors ?? [];
+  if (!response.ok || responseJson.errors?.length || errors.length) {
+    throw new Error(
+      `Failed to mark QR redemption: ${JSON.stringify({
+        status: response.status,
+        errors: responseJson.errors ?? errors,
+      })}`,
+    );
+  }
+}
+
+async function processOrderCreate(payload, attributes) {
   const shop = attributes["X-Shopify-Shop-Domain"] ?? attributes.shop_domain;
   const topic = attributes["X-Shopify-Topic"] ?? attributes.topic;
   const lineItems = (payload?.line_items ?? []).map((item) => ({
@@ -83,16 +176,27 @@ function processOrderCreate(payload, attributes) {
   );
   console.log("---------------------");
 
-  // Add your warranty / order business logic here.
+  if (!shop || !hasQrDiscount(payload)) {
+    return;
+  }
+
+  const customerId = getCustomerGid(payload);
+  if (!customerId) {
+    console.log("Skipping QR redemption: order has no customer.");
+    return;
+  }
+
+  await markQrDiscountRedeemed(shop, customerId);
+  console.log(`Marked QR discount redeemed for ${customerId}.`);
 }
 
-const messageHandler = (message) => {
+const messageHandler = async (message) => {
   try {
     const data = message.data.toString("utf8");
     const payload = JSON.parse(data);
 
     console.log(`Received Pub/Sub message ${message.id}`);
-    processOrderCreate(payload, message.attributes ?? {});
+    await processOrderCreate(payload, message.attributes ?? {});
     message.ack();
   } catch (error) {
     console.error(`Failed to process message ${message.id}:`, error);
@@ -109,9 +213,10 @@ console.log(
   `Listening for Shopify orders/create on subscription "${subscriptionNameOrId}"…`,
 );
 
-const shutdown = () => {
+const shutdown = async () => {
   console.log("Stopping Pub/Sub listener…");
   subscription.removeListener("message", messageHandler);
+  await prisma.$disconnect();
   process.exit(0);
 };
 

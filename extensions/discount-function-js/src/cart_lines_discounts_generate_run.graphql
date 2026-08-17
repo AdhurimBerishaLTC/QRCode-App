@@ -3,6 +3,16 @@ query CartInput {
     attribute(key: "src") {
       value
     }
+    buyerIdentity {
+      customer {
+        qrDiscountRedeemed: metafield(
+          namespace: "$app"
+          key: "qr_discount_redeemed"
+        ) {
+          jsonValue
+        }
+      }
+    }
     lines {
       id
       cost {

@@ -26,6 +26,11 @@ export function cartDeliveryOptionsDiscountsGenerateRun(input) {
     return { operations: [] };
   }
 
+  const customer = input.cart.buyerIdentity?.customer;
+  if (!customer || customer.qrDiscountRedeemed?.jsonValue === true) {
+    return { operations: [] };
+  }
+
   if (!isFreeShippingEnabled(input.discount.metafield)) {
     return { operations: [] };
   }

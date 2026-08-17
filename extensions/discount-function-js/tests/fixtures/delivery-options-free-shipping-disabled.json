@@ -15,6 +15,11 @@
         "attribute": {
           "value": "qr"
         },
+        "buyerIdentity": {
+          "customer": {
+            "qrDiscountRedeemed": null
+          }
+        },
         "deliveryGroups": [
           {
             "id": "gid://shopify/CartDeliveryGroup/1"

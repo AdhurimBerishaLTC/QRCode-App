@@ -7,19 +7,15 @@
         "attribute": {
           "value": "qr"
         },
-        "buyerIdentity": {
-          "customer": {
-            "qrDiscountRedeemed": null
-          }
-        },
+        "buyerIdentity": null,
         "deliveryGroups": [
           {
-            "id": "gid://shopify/DeliveryGroup/0"
+            "id": "gid://shopify/CartDeliveryGroup/1"
           }
         ]
       },
       "discount": {
-        "discountClasses": [],
+        "discountClasses": ["SHIPPING"],
         "metafield": null
       }
     },

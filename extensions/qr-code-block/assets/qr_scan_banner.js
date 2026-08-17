@@ -51,20 +51,17 @@
       root.classList.add("is-visible");
     });
 
-    fetch(
-      "/cart/update.js",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+    fetch("/cart/update.js", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        attributes: {
+          src: "qr",
         },
-        body: JSON.stringify({
-          attributes: {
-            src: "qr",
-          },
-        }),
-      }.catch(() => {}),
-    );
+      }),
+    }).catch(() => {});
 
     clearScanParam();
     root._qrHideTimer = window.setTimeout(() => hideBanner(root), 3000);

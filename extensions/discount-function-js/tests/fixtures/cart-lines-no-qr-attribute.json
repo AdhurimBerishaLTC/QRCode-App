@@ -5,6 +5,7 @@
     "input": {
       "cart": {
         "attribute": null,
+        "buyerIdentity": null,
         "lines": [
           {
             "id": "gid://shopify/CartLine/0",
