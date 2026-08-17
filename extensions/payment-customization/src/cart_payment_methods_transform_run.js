@@ -12,6 +12,28 @@ const DEFAULTS = {
   paymentMethodName: "Cash on Delivery",
 };
 
+const PAYMENT_METHOD_ALIASES = {
+  "credit card": ["credit card", "credit/debit", "bogus gateway"],
+};
+
+/**
+ * @param {string} methodName
+ * @param {string} configuredName
+ */
+function matchesConfiguredMethod(methodName, configuredName) {
+  const method = String(methodName ?? "").toLowerCase();
+  const configured = String(configuredName ?? "").toLowerCase().trim();
+  if (!configured) {
+    return false;
+  }
+  if (method.includes(configured)) {
+    return true;
+  }
+
+  const aliases = PAYMENT_METHOD_ALIASES[configured] ?? [];
+  return aliases.some((alias) => method.includes(alias));
+}
+
 /**
  * @param {CartPaymentMethodsTransformRunInput} input
  * @returns {CartPaymentMethodsTransformRunResult}
@@ -25,7 +47,7 @@ export function cartPaymentMethodsTransformRun(input) {
   }
 
   const hidePaymentMethod = input.paymentMethods.find((method) =>
-    method.name.includes(config.paymentMethodName),
+    matchesConfiguredMethod(method.name, config.paymentMethodName),
   );
   if (!hidePaymentMethod) {
     return NO_CHANGES;

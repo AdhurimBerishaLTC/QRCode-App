@@ -11,6 +11,23 @@ import { authenticate } from "../shopify.server";
 
 const METAFIELD_NAMESPACE = "$app:payment-customization";
 const METAFIELD_KEY = "function-configuration";
+const OTHER_PAYMENT_METHOD = "__other__";
+const PAYMENT_METHOD_OPTIONS = [
+  "Cash on Delivery",
+  "Credit card",
+  "(for testing) Bogus Gateway",
+  "PayPal",
+  "Shopify Payments",
+  "Shop Pay",
+  "Apple Pay",
+  "Google Pay",
+];
+
+function paymentMethodSelection(name) {
+  return PAYMENT_METHOD_OPTIONS.includes(name)
+    ? name
+    : OTHER_PAYMENT_METHOD;
+}
 
 function paymentCustomizationGid(id) {
   return id.startsWith("gid://")
@@ -90,11 +107,11 @@ export const action = async ({ params, request }) => {
 
   const paymentCustomizationInput = {
     title: `Hide ${paymentMethodName} if cart total is larger than ${cartTotal}`,
-    enabled: true,
     metafields: [metafield],
   };
 
   if (id === "new") {
+    paymentCustomizationInput.enabled = true;
     paymentCustomizationInput.functionHandle =
       functionId || "payment-customization";
     const response = await admin.graphql(
@@ -152,12 +169,18 @@ export default function PaymentCustomization() {
   const actionData = useActionData();
   const navigation = useNavigation();
   const loaderData = useLoaderData();
-  const [paymentMethodName, setPaymentMethodName] = useState(
-    loaderData.paymentMethodName,
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(
+    paymentMethodSelection(loaderData.paymentMethodName),
+  );
+  const [customPaymentMethodName, setCustomPaymentMethodName] = useState(
+    paymentMethodSelection(loaderData.paymentMethodName) === OTHER_PAYMENT_METHOD
+      ? loaderData.paymentMethodName
+      : "",
   );
   const [cartTotal, setCartTotal] = useState(loaderData.cartTotal);
 
   const isLoading = navigation.state === "submitting";
+  const isOtherPaymentMethod = selectedPaymentMethod === OTHER_PAYMENT_METHOD;
   const errors = actionData?.errors ?? [];
 
   useEffect(() => {
@@ -168,6 +191,9 @@ export default function PaymentCustomization() {
 
   const handleSubmit = (event) => {
     event.preventDefault();
+    const paymentMethodName = isOtherPaymentMethod
+      ? customPaymentMethodName.trim()
+      : selectedPaymentMethod;
     submit(
       {
         paymentMethodName,
@@ -179,7 +205,12 @@ export default function PaymentCustomization() {
   };
 
   const handleReset = () => {
-    setPaymentMethodName(loaderData.paymentMethodName);
+    setSelectedPaymentMethod(paymentMethodSelection(loaderData.paymentMethodName));
+    setCustomPaymentMethodName(
+      paymentMethodSelection(loaderData.paymentMethodName) === OTHER_PAYMENT_METHOD
+        ? loaderData.paymentMethodName
+        : "",
+    );
     setCartTotal(loaderData.cartTotal);
   };
 
@@ -200,16 +231,45 @@ export default function PaymentCustomization() {
 
         <s-section>
           <s-stack gap="base">
-            <s-text-field
-              name="paymentMethodName"
+            <s-select
               label="Payment method"
-              details="Must match the checkout name, for example Cash on Delivery"
-              value={paymentMethodName}
-              onInput={(e) => setPaymentMethodName(e.currentTarget.value)}
+              details="Must match the checkout name"
+              value={selectedPaymentMethod}
+              onChange={(e) =>
+                setSelectedPaymentMethod(e.currentTarget.value)
+              }
               disabled={isLoading}
-              autoComplete="off"
               required
-            ></s-text-field>
+            >
+              {PAYMENT_METHOD_OPTIONS.map((method) => (
+                <s-option
+                  key={method}
+                  value={method}
+                  selected={selectedPaymentMethod === method}
+                >
+                  {method}
+                </s-option>
+              ))}
+              <s-option
+                value={OTHER_PAYMENT_METHOD}
+                selected={isOtherPaymentMethod}
+              >
+                Other
+              </s-option>
+            </s-select>
+            {isOtherPaymentMethod ? (
+              <s-text-field
+                label="Custom payment method name"
+                details="Must match the checkout name, for example Cash on Delivery"
+                value={customPaymentMethodName}
+                onInput={(e) =>
+                  setCustomPaymentMethodName(e.currentTarget.value)
+                }
+                disabled={isLoading}
+                autoComplete="off"
+                required
+              ></s-text-field>
+            ) : null}
             <s-number-field
               name="cartTotal"
               label="Hide when cart total is greater than"

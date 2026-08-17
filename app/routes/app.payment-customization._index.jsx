@@ -1,4 +1,4 @@
-import { useLoaderData } from "react-router";
+import { useFetcher, useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 
@@ -37,14 +37,61 @@ export const loader = async ({ request }) => {
   return { customizations };
 };
 
+export const action = async ({ request }) => {
+  const { admin } = await authenticate.admin(request);
+  const formData = await request.formData();
+  const id = String(formData.get("id") ?? "");
+  const enabled = String(formData.get("enabled")) === "true";
+
+  if (!id) {
+    return { errors: [{ message: "Missing payment customization." }] };
+  }
+
+  const response = await admin.graphql(
+    `#graphql
+      mutation paymentCustomizationActivation($ids: [ID!]!, $enabled: Boolean!) {
+        paymentCustomizationActivation(ids: $ids, enabled: $enabled) {
+          ids
+          userErrors {
+            message
+          }
+        }
+      }`,
+    {
+      variables: {
+        ids: [id],
+        enabled,
+      },
+    },
+  );
+
+  const responseJson = await response.json();
+  const errors =
+    responseJson.data?.paymentCustomizationActivation?.userErrors ?? [];
+
+  return { errors };
+};
+
 export default function PaymentCustomizationsIndex() {
   const { customizations } = useLoaderData();
+  const fetcher = useFetcher();
+  const errors = fetcher.data?.errors ?? [];
+  const pendingId = fetcher.formData?.get("id");
+  const pendingEnabled = String(fetcher.formData?.get("enabled")) === "true";
+  const isSubmitting = fetcher.state !== "idle";
 
   return (
     <s-page heading="Hide payment method">
       <s-link slot="primary-actions" href={createPaymentCustomizationPath()}>
         Create customization
       </s-link>
+      {errors.length > 0 ? (
+        <s-banner tone="critical" heading="Couldn't update the customization.">
+          {errors.map((error, index) => (
+            <s-paragraph key={index}>{error.message}</s-paragraph>
+          ))}
+        </s-banner>
+      ) : null}
       {customizations.length === 0 ? (
         <s-section>
           <s-paragraph>
@@ -59,11 +106,15 @@ export default function PaymentCustomizationsIndex() {
               <s-table-header listSlot="primary">Title</s-table-header>
               <s-table-header>Payment method</s-table-header>
               <s-table-header>Cart total</s-table-header>
-              <s-table-header>Status</s-table-header>
+              <s-table-header>Enabled</s-table-header>
             </s-table-header-row>
             <s-table-body>
               {customizations.map((customization) => {
                 const config = customization.metafield?.jsonValue ?? {};
+                const enabled =
+                  pendingId === customization.id
+                    ? pendingEnabled
+                    : customization.enabled;
                 return (
                   <s-table-row key={customization.id} id={customization.id}>
                     <s-table-cell>
@@ -78,7 +129,23 @@ export default function PaymentCustomizationsIndex() {
                       {config.cartTotal != null ? `$${config.cartTotal}` : "—"}
                     </s-table-cell>
                     <s-table-cell>
-                      {customization.enabled ? "Enabled" : "Disabled"}
+                      <s-switch
+                        label="Enabled"
+                        labelAccessibilityVisibility="exclusive"
+                        checked={enabled}
+                        disabled={isSubmitting && pendingId === customization.id}
+                        onChange={(event) => {
+                          fetcher.submit(
+                            {
+                              id: customization.id,
+                              enabled: event.currentTarget.checked
+                                ? "true"
+                                : "false",
+                            },
+                            { method: "post" },
+                          );
+                        }}
+                      ></s-switch>
                     </s-table-cell>
                   </s-table-row>
                 );
