@@ -7,6 +7,15 @@
 
 const NO_CHANGES = { operations: [] };
 
+/**
+ * @param {CartPaymentMethodsTransformRunInput} input
+ * @returns {number}
+ */
+function presentmentRate(input) {
+  const rate = parseFloat(input.presentmentCurrencyRate ?? "1");
+  return Number.isFinite(rate) && rate > 0 ? rate : 1;
+}
+
 /** @type {Record<string, string[]>} */
 const PAYMENT_METHOD_ALIASES = {
   "credit card": ["credit card", "credit/debit", "bogus gateway"],
@@ -41,7 +50,8 @@ export function cartPaymentMethodsTransformRun(input) {
   }
 
   const cartTotal = parseFloat(input.cart.cost.totalAmount.amount ?? "0.0");
-  if (!(cartTotal > config.cartTotal)) {
+  const configuredTotal = Number(config.cartTotal) * presentmentRate(input);
+  if (!(cartTotal > configuredTotal)) {
     return NO_CHANGES;
   }
 

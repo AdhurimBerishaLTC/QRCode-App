@@ -1,0 +1,4 @@
+{
+  "name": "Réduction scan QR",
+  "description": "Applique un pourcentage sur la commande et la livraison gratuite après un scan QR"
+}

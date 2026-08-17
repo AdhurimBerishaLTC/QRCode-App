@@ -4,7 +4,9 @@
     "target": "cart.delivery-options.discounts.generate.run",
     "input": {
       "discount": {
-        "discountClasses": ["SHIPPING"],
+        "discountClasses": [
+          "SHIPPING"
+        ],
         "metafield": null
       },
       "cart": {
@@ -15,6 +17,11 @@
             "id": "gid://shopify/CartDeliveryGroup/1"
           }
         ]
+      },
+      "localization": {
+        "language": {
+          "isoCode": "EN"
+        }
       }
     },
     "output": {

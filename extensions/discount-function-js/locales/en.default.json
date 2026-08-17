@@ -1,4 +1,4 @@
 {
-  "name": "discount-function-js",
-  "description": "discount-function-js"
+  "name": "QR scan discount",
+  "description": "Applies order percent off and free shipping after a QR scan"
 }

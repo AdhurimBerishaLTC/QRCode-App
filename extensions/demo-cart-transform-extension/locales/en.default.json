@@ -1,4 +1,4 @@
 {
-  "name": "demo-cart-transform-extension",
-  "description": "demo-cart-transform-extension"
+  "name": "Bundle expander",
+  "description": "Expands bundled products into their component items in the cart"
 }

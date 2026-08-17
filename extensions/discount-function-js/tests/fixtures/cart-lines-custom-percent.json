@@ -24,11 +24,18 @@
         ]
       },
       "discount": {
-        "discountClasses": ["ORDER"],
+        "discountClasses": [
+          "ORDER"
+        ],
         "metafield": {
           "jsonValue": {
             "orderPercent": 15
           }
+        }
+      },
+      "localization": {
+        "language": {
+          "isoCode": "EN"
         }
       }
     },
@@ -48,7 +55,7 @@
                 ],
                 "value": {
                   "percentage": {
-                    "value": 15.0
+                    "value": 15
                   }
                 }
               }

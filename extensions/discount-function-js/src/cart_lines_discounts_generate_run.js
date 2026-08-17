@@ -2,6 +2,7 @@ import {
   DiscountClass,
   OrderDiscountSelectionStrategy,
 } from "../generated/api";
+import { languageCode, orderDiscountMessage } from "./localization";
 
 /**
  * @typedef {import("../generated/api").CartInput} RunInput
@@ -53,7 +54,7 @@ export function cartLinesDiscountsGenerateRun(input) {
         orderDiscountsAdd: {
           candidates: [
             {
-              message: `QR SCAN — ${orderPercent}% OFF`,
+              message: orderDiscountMessage(languageCode(input), orderPercent),
               targets: [
                 {
                   orderSubtotal: {

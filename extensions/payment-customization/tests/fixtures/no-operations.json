@@ -3,9 +3,18 @@
     "export": "cart-payment-methods-transform-run",
     "target": "cart.payment-methods.transform.run",
     "input": {
+      "cart": {
+        "cost": {
+          "totalAmount": {
+            "amount": "0.0"
+          }
+        }
+      },
+      "paymentMethods": [],
       "paymentCustomization": {
         "metafield": null
-      }
+      },
+      "presentmentCurrencyRate": "1.0"
     },
     "output": {
       "operations": []

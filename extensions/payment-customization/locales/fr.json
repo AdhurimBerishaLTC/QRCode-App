@@ -1,0 +1,4 @@
+{
+  "name": "Masquer un moyen de paiement",
+  "description": "Masque un moyen de paiement lorsque le total du panier dépasse un montant configuré"
+}

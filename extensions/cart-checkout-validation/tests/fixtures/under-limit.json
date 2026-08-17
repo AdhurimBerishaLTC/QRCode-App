@@ -1,0 +1,36 @@
+{
+  "payload": {
+    "export": "cart-validations-generate-run",
+    "target": "cart.validations.generate.run",
+    "input": {
+      "cart": {
+        "buyerIdentity": {
+          "customer": {
+            "numberOfOrders": 0
+          }
+        },
+        "cost": {
+          "subtotalAmount": {
+            "amount": "999.0",
+            "currencyCode": "USD"
+          }
+        }
+      },
+      "localization": {
+        "language": {
+          "isoCode": "EN"
+        }
+      },
+      "presentmentCurrencyRate": "1.0"
+    },
+    "output": {
+      "operations": [
+        {
+          "validationAdd": {
+            "errors": []
+          }
+        }
+      ]
+    }
+  }
+}

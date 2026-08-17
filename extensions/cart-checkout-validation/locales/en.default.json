@@ -1,4 +1,4 @@
 {
-  "name": "cart-checkout-validation",
-  "description": "cart-checkout-validation"
+  "name": "New customer order limit",
+  "description": "Blocks high-value orders for customers without established order history"
 }

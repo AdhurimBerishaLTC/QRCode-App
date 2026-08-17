@@ -1,0 +1,4 @@
+{
+  "name": "Limite de commande pour nouveaux clients",
+  "description": "Bloque les commandes de montant élevé pour les clients sans historique de commandes établi"
+}

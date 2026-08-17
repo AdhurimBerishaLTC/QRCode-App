@@ -21,6 +21,11 @@
       "discount": {
         "discountClasses": [],
         "metafield": null
+      },
+      "localization": {
+        "language": {
+          "isoCode": "EN"
+        }
       }
     },
     "output": {

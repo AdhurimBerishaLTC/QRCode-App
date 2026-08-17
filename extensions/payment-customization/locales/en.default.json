@@ -1,4 +1,4 @@
 {
-  "name": "payment-customization",
-  "description": "payment-customization"
+  "name": "Hide payment method",
+  "description": "Hides a payment method when the cart total is above a configured amount"
 }

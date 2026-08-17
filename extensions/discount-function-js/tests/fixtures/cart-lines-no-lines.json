@@ -11,8 +11,16 @@
         "lines": []
       },
       "discount": {
-        "discountClasses": ["ORDER", "PRODUCT"],
+        "discountClasses": [
+          "ORDER",
+          "PRODUCT"
+        ],
         "metafield": null
+      },
+      "localization": {
+        "language": {
+          "isoCode": "EN"
+        }
       }
     },
     "output": {

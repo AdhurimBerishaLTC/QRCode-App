@@ -28,4 +28,9 @@ query CartInput {
       jsonValue
     }
   }
+  localization {
+    language {
+      isoCode
+    }
+  }
 }

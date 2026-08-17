@@ -15,8 +15,15 @@
         "deliveryGroups": []
       },
       "discount": {
-        "discountClasses": ["SHIPPING"],
+        "discountClasses": [
+          "SHIPPING"
+        ],
         "metafield": null
+      },
+      "localization": {
+        "language": {
+          "isoCode": "EN"
+        }
       }
     },
     "output": {

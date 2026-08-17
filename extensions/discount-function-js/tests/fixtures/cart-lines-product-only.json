@@ -24,8 +24,15 @@
         ]
       },
       "discount": {
-        "discountClasses": ["PRODUCT"],
+        "discountClasses": [
+          "PRODUCT"
+        ],
         "metafield": null
+      },
+      "localization": {
+        "language": {
+          "isoCode": "EN"
+        }
       }
     },
     "output": {

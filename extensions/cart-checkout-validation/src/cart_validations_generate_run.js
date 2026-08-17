@@ -1,47 +1,78 @@
 // @ts-check
 
-// Use JSDoc annotations for type safety
 /**
  * @typedef {import("../generated/api").CartValidationsGenerateRunInput} CartValidationsGenerateRunInput
  * @typedef {import("../generated/api").CartValidationsGenerateRunResult} CartValidationsGenerateRunResult
  */
 
-// The configured entrypoint for the 'cart.validations.generate.run' extension target
+const SHOP_MAX_SUBTOTAL = 1000;
+const MIN_ESTABLISHED_ORDERS = 5;
+
+/**
+ * @param {CartValidationsGenerateRunInput} input
+ * @returns {string}
+ */
+function languageCode(input) {
+  return String(input.localization?.language?.isoCode ?? "EN").toUpperCase();
+}
+
+/**
+ * @param {CartValidationsGenerateRunInput} input
+ * @returns {number}
+ */
+function presentmentRate(input) {
+  const rate = parseFloat(input.presentmentCurrencyRate ?? "1");
+  return Number.isFinite(rate) && rate > 0 ? rate : 1;
+}
+
+/**
+ * @param {string} language
+ * @param {number} amount
+ * @param {string} currencyCode
+ * @returns {string}
+ */
+function maxSubtotalMessage(language, amount, currencyCode) {
+  const formatted = Number.isInteger(amount)
+    ? String(amount)
+    : amount.toFixed(2);
+  if (language === "FR") {
+    return `Le montant maximum de commande est de ${formatted} ${currencyCode} pour les clients sans historique de commandes établi`;
+  }
+  return `There's an order maximum of ${formatted} ${currencyCode} for customers without established order history`;
+}
+
 /**
  * @param {CartValidationsGenerateRunInput} input
  * @returns {CartValidationsGenerateRunResult}
  */
 export function cartValidationsGenerateRun(input) {
-  // The error
-  const error = {
-    message:
-      "There's an order maximum of $1,000 for customers without established order history",
-    target: "cart",
-  };
-  // Parse the decimal (serialized as a string) into a float.
   const orderSubtotal = parseFloat(input.cart.cost.subtotalAmount.amount);
+  const maxSubtotal = SHOP_MAX_SUBTOTAL * presentmentRate(input);
   const errors = [];
 
-  // Orders with subtotals greater than $1,000 are available only to established customers.
-  if (orderSubtotal > 1000.0) {
-    // If the customer has ordered less than 5 times in the past,
-    // then treat them as a new customer.
+  if (orderSubtotal > maxSubtotal) {
     const numberOfOrders =
       input.cart.buyerIdentity?.customer?.numberOfOrders ?? 0;
 
-    if (numberOfOrders < 5) {
-      errors.push(error);
+    if (numberOfOrders < MIN_ESTABLISHED_ORDERS) {
+      errors.push({
+        message: maxSubtotalMessage(
+          languageCode(input),
+          maxSubtotal,
+          input.cart.cost.subtotalAmount.currencyCode ?? "USD",
+        ),
+        target: "$.cart",
+      });
     }
   }
 
-  // A single validation operation
-  const operations = [
-    {
-      validationAdd: {
-        errors,
+  return {
+    operations: [
+      {
+        validationAdd: {
+          errors,
+        },
       },
-    },
-  ];
-
-  return { operations };
+    ],
+  };
 }

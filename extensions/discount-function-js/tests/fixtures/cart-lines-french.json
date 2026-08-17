@@ -24,14 +24,12 @@
         ]
       },
       "discount": {
-        "discountClasses": [
-          "ORDER"
-        ],
+        "discountClasses": ["ORDER"],
         "metafield": null
       },
       "localization": {
         "language": {
-          "isoCode": "EN"
+          "isoCode": "FR"
         }
       }
     },
@@ -41,7 +39,7 @@
           "orderDiscountsAdd": {
             "candidates": [
               {
-                "message": "QR SCAN — 10% OFF",
+                "message": "SCAN QR — 10 % DE RÉDUCTION",
                 "targets": [
                   {
                     "orderSubtotal": {
@@ -51,7 +49,7 @@
                 ],
                 "value": {
                   "percentage": {
-                    "value": 10
+                    "value": 10.0
                   }
                 }
               }

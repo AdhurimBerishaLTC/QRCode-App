@@ -24,8 +24,17 @@
         ]
       },
       "discount": {
-        "discountClasses": ["PRODUCT", "ORDER", "SHIPPING"],
+        "discountClasses": [
+          "PRODUCT",
+          "ORDER",
+          "SHIPPING"
+        ],
         "metafield": null
+      },
+      "localization": {
+        "language": {
+          "isoCode": "EN"
+        }
       }
     },
     "output": {
@@ -44,7 +53,7 @@
                 ],
                 "value": {
                   "percentage": {
-                    "value": 10.0
+                    "value": 10
                   }
                 }
               }

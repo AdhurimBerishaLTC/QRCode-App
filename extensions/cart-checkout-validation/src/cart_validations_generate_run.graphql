@@ -8,7 +8,14 @@ query CartValidationsGenerateRunInput {
     cost {
       subtotalAmount {
         amount
+        currencyCode
       }
     }
   }
+  localization {
+    language {
+      isoCode
+    }
+  }
+  presentmentCurrencyRate
 }

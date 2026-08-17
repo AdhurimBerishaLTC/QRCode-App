@@ -2,6 +2,7 @@ import {
   DeliveryDiscountSelectionStrategy,
   DiscountClass,
 } from "../generated/api";
+import { freeShippingMessage, languageCode } from "./localization";
 
 /**
  * @typedef {import("../generated/api").DeliveryInput} RunInput
@@ -53,7 +54,7 @@ export function cartDeliveryOptionsDiscountsGenerateRun(input) {
         deliveryDiscountsAdd: {
           candidates: [
             {
-              message: "QR SCAN — FREE SHIPPING",
+              message: freeShippingMessage(languageCode(input)),
               targets: [
                 {
                   deliveryGroup: {

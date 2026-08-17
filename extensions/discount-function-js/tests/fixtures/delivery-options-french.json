@@ -1,8 +1,12 @@
 {
   "payload": {
-    "export": "cart-lines-discounts-generate-run",
-    "target": "cart.lines.discounts.generate.run",
+    "export": "cart-delivery-options-discounts-generate-run",
+    "target": "cart.delivery-options.discounts.generate.run",
     "input": {
+      "discount": {
+        "discountClasses": ["SHIPPING"],
+        "metafield": null
+      },
       "cart": {
         "attribute": {
           "value": "qr"
@@ -12,51 +16,40 @@
             "qrDiscountRedeemed": null
           }
         },
-        "lines": [
+        "deliveryGroups": [
           {
-            "id": "gid://shopify/CartLine/0",
-            "cost": {
-              "subtotalAmount": {
-                "amount": "100.0"
-              }
-            }
+            "id": "gid://shopify/CartDeliveryGroup/1"
           }
         ]
       },
-      "discount": {
-        "discountClasses": [
-          "ORDER"
-        ],
-        "metafield": null
-      },
       "localization": {
         "language": {
-          "isoCode": "EN"
+          "isoCode": "FR"
         }
       }
     },
     "output": {
       "operations": [
         {
-          "orderDiscountsAdd": {
+          "deliveryDiscountsAdd": {
             "candidates": [
               {
-                "message": "QR SCAN — 10% OFF",
+                "message": "SCAN QR — LIVRAISON GRATUITE",
                 "targets": [
                   {
-                    "orderSubtotal": {
-                      "excludedCartLineIds": []
+                    "deliveryGroup": {
+                      "id": "gid://shopify/CartDeliveryGroup/1"
                     }
                   }
                 ],
                 "value": {
                   "percentage": {
-                    "value": 10
+                    "value": 100.0
                   }
                 }
               }
             ],
-            "selectionStrategy": "FIRST"
+            "selectionStrategy": "ALL"
           }
         }
       ]
