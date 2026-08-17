@@ -4,6 +4,9 @@
     "target": "cart.lines.discounts.generate.run",
     "input": {
       "cart": {
+        "attribute": {
+          "value": "qr"
+        },
         "lines": [
           {
             "id": "gid://shopify/CartLine/0",
@@ -16,7 +19,8 @@
         ]
       },
       "discount": {
-        "discountClasses": ["ORDER"]
+        "discountClasses": ["ORDER"],
+        "metafield": null
       }
     },
     "output": {
@@ -25,7 +29,7 @@
           "orderDiscountsAdd": {
             "candidates": [
               {
-                "message": "10% OFF ORDER",
+                "message": "QR SCAN — 10% OFF",
                 "targets": [
                   {
                     "orderSubtotal": {

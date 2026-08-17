@@ -3,19 +3,17 @@
     "export": "cart-delivery-options-discounts-generate-run",
     "target": "cart.delivery-options.discounts.generate.run",
     "input": {
+      "discount": {
+        "discountClasses": ["SHIPPING"],
+        "metafield": null
+      },
       "cart": {
-        "attribute": {
-          "value": "qr"
-        },
+        "attribute": null,
         "deliveryGroups": [
           {
-            "id": "gid://shopify/DeliveryGroup/0"
+            "id": "gid://shopify/CartDeliveryGroup/1"
           }
         ]
-      },
-      "discount": {
-        "discountClasses": [],
-        "metafield": null
       }
     },
     "output": {

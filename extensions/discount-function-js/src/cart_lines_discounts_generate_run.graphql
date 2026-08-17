@@ -1,5 +1,8 @@
 query CartInput {
   cart {
+    attribute(key: "src") {
+      value
+    }
     lines {
       id
       cost {
@@ -11,5 +14,8 @@ query CartInput {
   }
   discount {
     discountClasses
+    metafield(namespace: "$app:qr-discount", key: "function-configuration") {
+      jsonValue
+    }
   }
 }

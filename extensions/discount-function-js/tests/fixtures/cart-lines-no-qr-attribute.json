@@ -4,9 +4,7 @@
     "target": "cart.lines.discounts.generate.run",
     "input": {
       "cart": {
-        "attribute": {
-          "value": "qr"
-        },
+        "attribute": null,
         "lines": [
           {
             "id": "gid://shopify/CartLine/0",
@@ -19,7 +17,7 @@
         ]
       },
       "discount": {
-        "discountClasses": ["PRODUCT"],
+        "discountClasses": ["ORDER"],
         "metafield": null
       }
     },

@@ -31,7 +31,8 @@
   };
 
   const showBanner = (root) => {
-    const message = root.dataset.message || "You opened this page by scanning a QR code";
+    const message =
+      root.dataset.message || "You opened this page by scanning a QR code";
     const dismissLabel = root.dataset.dismissLabel || "Dismiss";
 
     const text = document.createElement("p");
@@ -49,6 +50,21 @@
     requestAnimationFrame(() => {
       root.classList.add("is-visible");
     });
+
+    fetch(
+      "/cart/update.js",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          attributes: {
+            src: "qr",
+          },
+        }),
+      }.catch(() => {}),
+    );
 
     clearScanParam();
     root._qrHideTimer = window.setTimeout(() => hideBanner(root), 3000);

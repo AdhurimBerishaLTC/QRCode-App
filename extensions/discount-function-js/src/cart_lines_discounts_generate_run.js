@@ -1,7 +1,6 @@
 import {
   DiscountClass,
   OrderDiscountSelectionStrategy,
-  ProductDiscountSelectionStrategy,
 } from "../generated/api";
 
 /**
@@ -9,87 +8,64 @@ import {
  * @typedef {import("../generated/api").CartLinesDiscountsGenerateRunResult} CartLinesDiscountsGenerateRunResult
  */
 
+const DEFAULT_ORDER_PERCENT = 10;
+
+/**
+ * @param {{ jsonValue?: { orderPercent?: number } | null } | null | undefined} metafield
+ * @returns {number}
+ */
+function getOrderPercent(metafield) {
+  const value = metafield?.jsonValue?.orderPercent;
+  return typeof value === "number" && value > 0 ? value : DEFAULT_ORDER_PERCENT;
+}
+
 /**
  * @param {RunInput} input
  * @returns {CartLinesDiscountsGenerateRunResult}
  */
-
 export function cartLinesDiscountsGenerateRun(input) {
+  const src = input.cart.attribute?.value;
+  if (src !== "qr") {
+    return { operations: [] };
+  }
+
   if (!input.cart.lines.length) {
-    throw new Error("No cart lines found");
+    return { operations: [] };
   }
 
   const hasOrderDiscountClass = input.discount.discountClasses.includes(
     DiscountClass.Order,
   );
-  const hasProductDiscountClass = input.discount.discountClasses.includes(
-    DiscountClass.Product,
-  );
-
-  if (!hasOrderDiscountClass && !hasProductDiscountClass) {
+  if (!hasOrderDiscountClass) {
     return { operations: [] };
   }
 
-  const maxCartLine = input.cart.lines.reduce((maxLine, line) => {
-    if (line.cost.subtotalAmount.amount > maxLine.cost.subtotalAmount.amount) {
-      return line;
-    }
-    return maxLine;
-  }, input.cart.lines[0]);
-
-  const operations = [];
-
-  if (hasOrderDiscountClass) {
-    operations.push({
-      orderDiscountsAdd: {
-        candidates: [
-          {
-            message: "10% OFF ORDER",
-            targets: [
-              {
-                orderSubtotal: {
-                  excludedCartLineIds: [],
-                },
-              },
-            ],
-            value: {
-              percentage: {
-                value: 10,
-              },
-            },
-          },
-        ],
-        selectionStrategy: OrderDiscountSelectionStrategy.First,
-      },
-    });
-  }
-
-  if (hasProductDiscountClass) {
-    operations.push({
-      productDiscountsAdd: {
-        candidates: [
-          {
-            message: "20% OFF PRODUCT",
-            targets: [
-              {
-                cartLine: {
-                  id: maxCartLine.id,
-                },
-              },
-            ],
-            value: {
-              percentage: {
-                value: 20,
-              },
-            },
-          },
-        ],
-        selectionStrategy: ProductDiscountSelectionStrategy.First,
-      },
-    });
-  }
+  const orderPercent = getOrderPercent(input.discount.metafield);
 
   return {
-    operations,
+    operations: [
+      {
+        orderDiscountsAdd: {
+          candidates: [
+            {
+              message: `QR SCAN — ${orderPercent}% OFF`,
+              targets: [
+                {
+                  orderSubtotal: {
+                    excludedCartLineIds: [],
+                  },
+                },
+              ],
+              value: {
+                percentage: {
+                  value: orderPercent,
+                },
+              },
+            },
+          ],
+          selectionStrategy: OrderDiscountSelectionStrategy.First,
+        },
+      },
+    ],
   };
 }

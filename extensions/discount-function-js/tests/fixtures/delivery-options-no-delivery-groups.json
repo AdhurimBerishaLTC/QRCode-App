@@ -4,10 +4,14 @@
     "target": "cart.delivery-options.discounts.generate.run",
     "input": {
       "cart": {
+        "attribute": {
+          "value": "qr"
+        },
         "deliveryGroups": []
       },
       "discount": {
-        "discountClasses": ["SHIPPING"]
+        "discountClasses": ["SHIPPING"],
+        "metafield": null
       }
     },
     "output": {

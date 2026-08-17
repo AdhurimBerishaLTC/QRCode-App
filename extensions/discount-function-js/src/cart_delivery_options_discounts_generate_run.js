@@ -9,20 +9,35 @@ import {
  */
 
 /**
+ * @param {{ jsonValue?: { freeShipping?: boolean } | null } | null | undefined} metafield
+ * @returns {boolean}
+ */
+function isFreeShippingEnabled(metafield) {
+  return metafield?.jsonValue?.freeShipping !== false;
+}
+
+/**
  * @param {RunInput} input
  * @returns {CartDeliveryOptionsDiscountsGenerateRunResult}
  */
-
 export function cartDeliveryOptionsDiscountsGenerateRun(input) {
+  const src = input.cart.attribute?.value;
+  if (src !== "qr") {
+    return { operations: [] };
+  }
+
+  if (!isFreeShippingEnabled(input.discount.metafield)) {
+    return { operations: [] };
+  }
+
   const firstDeliveryGroup = input.cart.deliveryGroups[0];
   if (!firstDeliveryGroup) {
-    throw new Error("No delivery groups found");
+    return { operations: [] };
   }
 
   const hasShippingDiscountClass = input.discount.discountClasses.includes(
     DiscountClass.Shipping,
   );
-
   if (!hasShippingDiscountClass) {
     return { operations: [] };
   }
@@ -33,7 +48,7 @@ export function cartDeliveryOptionsDiscountsGenerateRun(input) {
         deliveryDiscountsAdd: {
           candidates: [
             {
-              message: "FREE DELIVERY",
+              message: "QR SCAN — FREE SHIPPING",
               targets: [
                 {
                   deliveryGroup: {

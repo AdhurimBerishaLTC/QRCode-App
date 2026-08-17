@@ -5,12 +5,21 @@
     "input": {
       "cart": {
         "attribute": {
-          "value": "qr"
+          "value": "email"
         },
-        "lines": []
+        "lines": [
+          {
+            "id": "gid://shopify/CartLine/0",
+            "cost": {
+              "subtotalAmount": {
+                "amount": "100.0"
+              }
+            }
+          }
+        ]
       },
       "discount": {
-        "discountClasses": ["ORDER", "PRODUCT"],
+        "discountClasses": ["ORDER"],
         "metafield": null
       }
     },

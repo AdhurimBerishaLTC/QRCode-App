@@ -12,15 +12,19 @@
             "id": "gid://shopify/CartLine/0",
             "cost": {
               "subtotalAmount": {
-                "amount": "6.0"
+                "amount": "100.0"
               }
             }
           }
         ]
       },
       "discount": {
-        "discountClasses": ["PRODUCT", "ORDER", "SHIPPING"],
-        "metafield": null
+        "discountClasses": ["ORDER"],
+        "metafield": {
+          "jsonValue": {
+            "orderPercent": 15
+          }
+        }
       }
     },
     "output": {
@@ -29,7 +33,7 @@
           "orderDiscountsAdd": {
             "candidates": [
               {
-                "message": "QR SCAN — 10% OFF",
+                "message": "QR SCAN — 15% OFF",
                 "targets": [
                   {
                     "orderSubtotal": {
@@ -39,7 +43,7 @@
                 ],
                 "value": {
                   "percentage": {
-                    "value": 10.0
+                    "value": 15.0
                   }
                 }
               }

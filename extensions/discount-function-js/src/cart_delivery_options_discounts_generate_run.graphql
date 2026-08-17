@@ -1,10 +1,16 @@
 query DeliveryInput {
   cart {
+    attribute(key: "src") {
+      value
+    }
     deliveryGroups {
       id
     }
   }
   discount {
     discountClasses
+    metafield(namespace: "$app:qr-discount", key: "function-configuration") {
+      jsonValue
+    }
   }
 }
