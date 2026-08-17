@@ -63,6 +63,10 @@ api_version = "2026-10"
   uri = "/webhooks/app/scopes_update"
   topics = [ "app/scopes_update" ]
 
+  [[webhooks.subscriptions]]
+  topics = ["products/update"]
+  uri = "/webhooks/products/update"
+
   # Delivered to Google Pub/Sub.
   # Grant delivery@shopify-pubsub-webhooks.iam.gserviceaccount.com Pub/Sub Publisher.
   [[webhooks.subscriptions]]
