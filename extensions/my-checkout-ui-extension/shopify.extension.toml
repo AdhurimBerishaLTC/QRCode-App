@@ -32,6 +32,10 @@ key = "sale_attribution"
 namespace = "$app"
 key = "requestedFreeGift"
 
+[[extensions.metafields]]
+namespace = "custom"
+key = "product_review"
+
 [extensions.settings]
 [[extensions.settings.fields]]
 key = "heading"

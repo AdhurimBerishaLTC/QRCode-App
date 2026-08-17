@@ -9,6 +9,11 @@ import {
   useStorageState,
 } from "./shared.jsx";
 
+const METAFIELD_NAMESPACE = "custom";
+const METAFIELD_KEY = "product_review";
+const CUSTOMER_ACCOUNT_API =
+  "shopify://customer-account/api/2026-07/graphql.json";
+
 export default function () {
   render(<ProductReview />, document.body);
 }
@@ -20,7 +25,6 @@ function ProductReview() {
   const [productReview, setProductReview] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Scope by order so a previous submit doesn't hide the survey on every order.
   const storageKey = orderValue?.id
     ? `product-reviewed:${orderValue.id}`
     : "product-reviewed";
@@ -57,16 +61,87 @@ function ProductReview() {
     i18n.translate("reviewOption2"),
   );
 
+  const reviewLabels = {
+    5: option5,
+    4: option4,
+    3: option3,
+    2: option2,
+  };
+
+  /**
+   * @param {string} key
+   * @returns {string}
+   */
+  function answerLabelFor(key) {
+    if (key === "5" || key === "4" || key === "3" || key === "2") {
+      return reviewLabels[key];
+    }
+    return key;
+  }
+
   async function handleSubmit() {
+    if (!productReview) {
+      throw new Error("Select an answer before submitting.");
+    }
+
+    const orderId = orderValue?.id;
+    if (!orderId) {
+      throw new Error("Order is not available.");
+    }
+
     setLoading(true);
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        console.log("Submitted:", productReview);
-        setLoading(false);
-        setProductReviewed(true);
-        resolve(undefined);
-      }, 750);
-    });
+    try {
+      const answerLabel = answerLabelFor(productReview);
+      const response = await fetch(CUSTOMER_ACCOUNT_API, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          query: `mutation SetProductReview($metafields: [MetafieldsSetInput!]!) {
+            metafieldsSet(metafields: $metafields) {
+              metafields {
+                key
+                value
+              }
+              userErrors {
+                field
+                message
+              }
+            }
+          }`,
+          variables: {
+            metafields: [
+              {
+                ownerId: orderId,
+                namespace: METAFIELD_NAMESPACE,
+                key: METAFIELD_KEY,
+                type: "single_line_text_field",
+                value: answerLabel,
+              },
+            ],
+          },
+        }),
+      });
+
+      const json = await response.json();
+      const userErrors = json.data?.metafieldsSet?.userErrors ?? [];
+      if (!response.ok || json.errors?.length || userErrors.length) {
+        console.error(
+          "Failed to save product review",
+          json.errors ?? userErrors,
+        );
+        throw new Error(
+          userErrors[0]?.message ??
+            json.errors?.[0]?.message ??
+            "Failed to save product review",
+        );
+      }
+
+      setProductReviewed(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   // Always preview in the editor, even if storage says submitted.
