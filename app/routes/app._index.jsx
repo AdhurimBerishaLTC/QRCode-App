@@ -3,10 +3,20 @@ import { useLoaderData } from "react-router";
 import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import { getQRCodes } from "../models/QRCode.server";
+import { ensureWebPixelEndpoint } from "../models/webPixel.server";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   const qrCodes = await getQRCodes(admin.graphql, session.shop);
+
+  try {
+    await ensureWebPixelEndpoint(
+      admin.graphql,
+      process.env.SHOPIFY_APP_URL,
+    );
+  } catch (error) {
+    console.error("[web pixel] failed to sync endpoint", error);
+  }
 
   return {
     qrCodes,

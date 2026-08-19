@@ -172,6 +172,12 @@ importers:
         specifier: ^10.10.x
         version: 10.29.8
 
+  extensions/my-web-pixel:
+    dependencies:
+      '@shopify/web-pixels-extension':
+        specifier: ^2.10.0
+        version: 2.18.0
+
   extensions/payment-customization:
     dependencies:
       '@shopify/shopify_function':
@@ -1446,6 +1452,9 @@ packages:
         optional: true
       preact:
         optional: true
+
+  '@shopify/web-pixels-extension@2.18.0':
+    resolution: {integrity: sha512-qHp93QKdxJ8UREzkYOje6343An2wvXLUF71uduahiTjBfYXQ7VqIAXoHCwzCnP3Kss1AXLpz7XPaKCRC0ONOTw==}
 
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
@@ -5958,6 +5967,8 @@ snapshots:
     optionalDependencies:
       '@preact/signals': 2.11.0(preact@10.29.8)
       preact: 10.29.8
+
+  '@shopify/web-pixels-extension@2.18.0': {}
 
   '@standard-schema/spec@1.1.0': {}
 
