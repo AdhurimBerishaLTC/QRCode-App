@@ -32,3 +32,16 @@ model Session {
   refreshToken        String?
   refreshTokenExpires DateTime?
 }
+
+model QrFunnelEvent {
+  id        String   @id @default(cuid())
+  shop      String
+  qrHandle  String
+  step      String
+  clientId  String
+  eventId   String   @unique
+  href      String?
+  createdAt DateTime @default(now())
+
+  @@index([shop, qrHandle])
+}

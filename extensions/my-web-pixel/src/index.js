@@ -75,6 +75,7 @@ register(async ({ analytics, browser, settings, init }) => {
       method: "POST",
       body: JSON.stringify({
         accountID: settings.accountID,
+        shop: init.data?.shop?.myshopifyDomain || "",
         step,
         qrHandle,
         name: event.name,

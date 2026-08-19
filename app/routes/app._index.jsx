@@ -4,10 +4,14 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 import { getQRCodes } from "../models/QRCode.server";
 import { ensureWebPixelEndpoint } from "../models/webPixel.server";
+import { getFunnelStatsByHandle } from "../models/qrFunnel.server";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
-  const qrCodes = await getQRCodes(admin.graphql, session.shop);
+  const [qrCodes, funnelStats] = await Promise.all([
+    getQRCodes(admin.graphql, session.shop),
+    getFunnelStatsByHandle(session.shop),
+  ]);
 
   try {
     await ensureWebPixelEndpoint(admin.graphql, process.env.SHOPIFY_APP_URL);
@@ -16,7 +20,22 @@ export const loader = async ({ request }) => {
   }
 
   return {
-    qrCodes,
+    qrCodes: qrCodes.map((qrCode) => {
+      const funnel = funnelStats[qrCode.handle] || {
+        viewed: 0,
+        addedToCart: 0,
+        purchased: 0,
+      };
+      const scans = qrCode.scans || 0;
+      return {
+        ...qrCode,
+        viewed: funnel.viewed,
+        addedToCart: funnel.addedToCart,
+        purchased: funnel.purchased,
+        conversion:
+          scans > 0 ? Math.round((funnel.purchased / scans) * 100) : undefined,
+      };
+    }),
   };
 };
 
@@ -65,6 +84,10 @@ const QRTable = ({ qrCodes }) => (
         <s-table-header>Product</s-table-header>
         <s-table-header>Date created</s-table-header>
         <s-table-header>Scans</s-table-header>
+        <s-table-header>Viewed</s-table-header>
+        <s-table-header>Added to cart</s-table-header>
+        <s-table-header>Purchases</s-table-header>
+        <s-table-header>Conv.</s-table-header>
       </s-table-header-row>
       <s-table-body>
         {qrCodes.map((qrCode) => (
@@ -118,6 +141,12 @@ const QRTableRow = ({ qrCode }) => (
     </s-table-cell>
     <s-table-cell>{new Date(qrCode.createdAt).toDateString()}</s-table-cell>
     <s-table-cell>{qrCode.scans}</s-table-cell>
+    <s-table-cell>{qrCode.viewed}</s-table-cell>
+    <s-table-cell>{qrCode.addedToCart}</s-table-cell>
+    <s-table-cell>{qrCode.purchased}</s-table-cell>
+    <s-table-cell>
+      {qrCode.conversion == null ? "—" : `${qrCode.conversion}%`}
+    </s-table-cell>
   </s-table-row>
 );
 
@@ -130,6 +159,10 @@ QRTableRow.propTypes = {
     productDeleted: PropTypes.bool,
     createdAt: PropTypes.string,
     scans: PropTypes.number,
+    viewed: PropTypes.number,
+    addedToCart: PropTypes.number,
+    purchased: PropTypes.number,
+    conversion: PropTypes.number,
   }).isRequired,
 };
 
