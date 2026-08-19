@@ -10,10 +10,7 @@ export const loader = async ({ request }) => {
   const qrCodes = await getQRCodes(admin.graphql, session.shop);
 
   try {
-    await ensureWebPixelEndpoint(
-      admin.graphql,
-      process.env.SHOPIFY_APP_URL,
-    );
+    await ensureWebPixelEndpoint(admin.graphql, process.env.SHOPIFY_APP_URL);
   } catch (error) {
     console.error("[web pixel] failed to sync endpoint", error);
   }

@@ -39,10 +39,10 @@ export const action = async ({ request }) => {
   }
 
   console.log("===== WEB PIXEL =====");
+  console.log("Step:", payload.step);
+  console.log("QR:", payload.qrHandle);
   console.log("Event:", payload.name);
   console.log("URL:", payload.href);
-  console.log("Title:", payload.title);
-  console.log("Account ID:", payload.accountID);
   console.log("Client ID:", payload.clientId);
   console.log("Payload:", payload);
   console.log("=====================");

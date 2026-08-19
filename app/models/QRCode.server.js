@@ -217,6 +217,14 @@ function getVariantLegacyId(qrCode) {
   return null;
 }
 
+function applyQrAttribution(url, handle) {
+  url.searchParams.set("src", "qr");
+  if (handle) {
+    url.searchParams.set("qr", handle);
+  }
+  return url.toString();
+}
+
 export function getDestinationUrl(qrCode, shop) {
   const variantId = getVariantLegacyId(qrCode);
 
@@ -226,8 +234,7 @@ export function getDestinationUrl(qrCode, shop) {
       if (variantId) {
         url.searchParams.set("variant", variantId);
       }
-      url.searchParams.set("src", "qr");
-      return url.toString();
+      return applyQrAttribution(url, qrCode.handle);
     }
 
     invariant(qrCode.productHandle, "Product handle is missing");
@@ -235,14 +242,12 @@ export function getDestinationUrl(qrCode, shop) {
     if (variantId) {
       url.searchParams.set("variant", variantId);
     }
-    url.searchParams.set("src", "qr");
-    return url.toString();
+    return applyQrAttribution(url, qrCode.handle);
   }
 
   invariant(variantId, "Unrecognized product variant ID");
   const cartUrl = new URL(`https://${shop}/cart/${variantId}:1`);
-  cartUrl.searchParams.set("src", "qr");
-  return cartUrl.toString();
+  return applyQrAttribution(cartUrl, qrCode.handle);
 }
 
 export async function saveQRCode(handle, data, graphql) {

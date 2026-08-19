@@ -6,6 +6,7 @@ import {
   getDestinationUrl,
   incrementQRCodeScans,
 } from "../models/QRCode.server";
+import { ensureWebPixelEndpoint } from "../models/webPixel.server";
 
 export const loader = async ({ request, params }) => {
   if (!params.id) {
@@ -24,6 +25,12 @@ export const loader = async ({ request, params }) => {
   }
 
   await incrementQRCodeScans(qrCode.id, qrCode.scans, admin.graphql);
+
+  try {
+    await ensureWebPixelEndpoint(admin.graphql, process.env.SHOPIFY_APP_URL);
+  } catch (error) {
+    console.error("[web pixel] failed to sync endpoint on scan", error);
+  }
 
   return redirect(getDestinationUrl(qrCode, shop));
 };

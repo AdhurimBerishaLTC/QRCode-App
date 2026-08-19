@@ -1,6 +1,7 @@
 (() => {
   const PARAM = "src";
   const VALUE = "qr";
+  const HANDLE_PARAM = "qr";
 
   const onReady = (callback) => {
     if (document.readyState === "loading") {
@@ -14,6 +15,7 @@
     const url = new URL(window.location.href);
     if (url.searchParams.get(PARAM) !== VALUE) return;
     url.searchParams.delete(PARAM);
+    url.searchParams.delete(HANDLE_PARAM);
     const next = `${url.pathname}${url.search}${url.hash}`;
     window.history.replaceState({}, "", next);
   };
@@ -51,6 +53,8 @@
       root.classList.add("is-visible");
     });
 
+    const handle = new URL(window.location.href).searchParams.get(HANDLE_PARAM);
+
     fetch("/cart/update.js", {
       method: "POST",
       headers: {
@@ -59,6 +63,7 @@
       body: JSON.stringify({
         attributes: {
           src: "qr",
+          ...(handle ? { qr_code: handle } : {}),
         },
       }),
     }).catch(() => {});
