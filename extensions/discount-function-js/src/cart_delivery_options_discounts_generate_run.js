@@ -3,6 +3,7 @@ import {
   DiscountClass,
 } from "../generated/api";
 import { freeShippingMessage, languageCode } from "./localization";
+import { isQrDiscountBlocked, isQrScan } from "./qrEligibility";
 
 /**
  * @typedef {import("../generated/api").DeliveryInput} RunInput
@@ -22,13 +23,16 @@ function isFreeShippingEnabled(metafield) {
  * @returns {CartDeliveryOptionsDiscountsGenerateRunResult}
  */
 export function cartDeliveryOptionsDiscountsGenerateRun(input) {
-  const src = input.cart.attribute?.value;
-  if (src !== "qr") {
+  if (!isQrScan(input.cart)) {
     return { operations: [] };
   }
 
   const customer = input.cart.buyerIdentity?.customer;
-  if (!customer || customer.qrDiscountRedeemed?.jsonValue === true) {
+  if (!customer) {
+    return { operations: [] };
+  }
+
+  if (isQrDiscountBlocked(input.cart)) {
     return { operations: [] };
   }
 

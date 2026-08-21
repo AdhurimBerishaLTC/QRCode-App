@@ -4,14 +4,12 @@
     "target": "cart.lines.discounts.generate.run",
     "input": {
       "cart": {
-        "attribute": {
-          "value": "qr"
-        },
+        "attribute": null,
         "buyerIdentity": {
           "customer": {
             "qrDiscountRedeemed": null
           },
-          "isAuthenticated": true
+          "isAuthenticated": false
         },
         "lines": [
           {
@@ -21,10 +19,14 @@
                 "amount": "100.0"
               }
             },
-            "qrSrc": null
+            "qrSrc": {
+              "value": "qr"
+            }
           }
         ],
-        "retailLocation": null
+        "retailLocation": {
+          "id": "gid://shopify/Location/1"
+        }
       },
       "discount": {
         "discountClasses": [

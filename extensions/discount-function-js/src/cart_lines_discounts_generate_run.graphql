@@ -3,7 +3,11 @@ query CartInput {
     attribute(key: "src") {
       value
     }
+    retailLocation {
+      id
+    }
     buyerIdentity {
+      isAuthenticated
       customer {
         qrDiscountRedeemed: metafield(
           namespace: "$app"
@@ -15,6 +19,9 @@ query CartInput {
     }
     lines {
       id
+      qrSrc: attribute(key: "src") {
+        value
+      }
       cost {
         subtotalAmount {
           amount

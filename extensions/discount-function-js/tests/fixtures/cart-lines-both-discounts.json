@@ -10,7 +10,8 @@
         "buyerIdentity": {
           "customer": {
             "qrDiscountRedeemed": null
-          }
+          },
+          "isAuthenticated": true
         },
         "lines": [
           {
@@ -19,9 +20,11 @@
               "subtotalAmount": {
                 "amount": "6.0"
               }
-            }
+            },
+            "qrSrc": null
           }
-        ]
+        ],
+        "retailLocation": null
       },
       "discount": {
         "discountClasses": [

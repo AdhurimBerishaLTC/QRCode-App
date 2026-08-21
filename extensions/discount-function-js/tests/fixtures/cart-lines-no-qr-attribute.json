@@ -13,9 +13,11 @@
               "subtotalAmount": {
                 "amount": "100.0"
               }
-            }
+            },
+            "qrSrc": null
           }
-        ]
+        ],
+        "retailLocation": null
       },
       "discount": {
         "discountClasses": [

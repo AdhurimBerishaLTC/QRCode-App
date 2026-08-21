@@ -12,13 +12,15 @@
             "qrDiscountRedeemed": {
               "jsonValue": true
             }
-          }
+          },
+          "isAuthenticated": true
         },
         "deliveryGroups": [
           {
             "id": "gid://shopify/CartDeliveryGroup/1"
           }
-        ]
+        ],
+        "retailLocation": null
       },
       "discount": {
         "discountClasses": [

@@ -9,7 +9,7 @@
   assign image_url = ''
 
   if share_product != blank
-    for entry in shop.metaobjects['$app:qrcode'].values
+    for entry in shop.metaobjects['$app:product_qr'].values
       assign entry_product = entry.product.value
       if entry_product != blank and entry_product.id == share_product.id
         assign qr_title = entry.title.value

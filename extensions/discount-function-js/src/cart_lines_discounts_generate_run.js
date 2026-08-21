@@ -3,6 +3,7 @@ import {
   OrderDiscountSelectionStrategy,
 } from "../generated/api";
 import { languageCode, orderDiscountMessage } from "./localization";
+import { isQrDiscountBlocked, isQrScan } from "./qrEligibility";
 
 /**
  * @typedef {import("../generated/api").CartInput} RunInput
@@ -25,13 +26,16 @@ function getOrderPercent(metafield) {
  * @returns {CartLinesDiscountsGenerateRunResult}
  */
 export function cartLinesDiscountsGenerateRun(input) {
-  const src = input.cart.attribute?.value;
-  if (src !== "qr") {
+  if (!isQrScan(input.cart)) {
     return { operations: [] };
   }
 
   const customer = input.cart.buyerIdentity?.customer;
-  if (!customer || customer.qrDiscountRedeemed?.jsonValue === true) {
+  if (!customer) {
+    return { operations: [] };
+  }
+
+  if (isQrDiscountBlocked(input.cart)) {
     return { operations: [] };
   }
 

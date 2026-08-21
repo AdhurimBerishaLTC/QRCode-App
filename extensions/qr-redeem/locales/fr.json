@@ -1,0 +1,19 @@
+{
+  "name": "QR Redeem",
+  "tile_heading": "Scanner le QR",
+  "tile_subheading": "Échanger un code QR produit",
+  "tile_needs_customer": "Ajoutez un client pour échanger",
+  "modal_heading": "Scanner le QR",
+  "scan_prompt": "Pointez la caméra vers un code QR produit.",
+  "looking_up": "Recherche du code QR…",
+  "invalid_qr": "Ce QR n’est pas un code produit de cette application.",
+  "not_found": "Aucun code QR trouvé pour ce scan.",
+  "missing_variant": "Ce code QR n’a pas de variante produit.",
+  "needs_customer": "Ajoutez un client avec un compte avant de scanner.",
+  "product_added": "Produit ajouté",
+  "added_toast": "Produit QR ajouté au panier",
+  "added_banner": "Ajouté au panier",
+  "add_failed": "Impossible d’ajouter ce code QR au panier.",
+  "scan_another": "Scanner un autre",
+  "try_again": "Réessayer"
+}

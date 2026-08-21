@@ -1,7 +1,123 @@
 import qrcode from "qrcode";
 import invariant from "tiny-invariant";
 
-const METAOBJECT_TYPE = "$app:qrcode";
+const METAOBJECT_TYPE = "$app:product_qr";
+
+async function findQrCodeDefinition(graphql) {
+  const byType = await graphql(
+    `
+      query GetQrCodeDefinition($type: String!) {
+        metaobjectDefinitionByType(type: $type) {
+          id
+          type
+        }
+      }
+    `,
+    { variables: { type: METAOBJECT_TYPE } },
+  );
+  const byTypeJson = await byType.json();
+  if (byTypeJson.data?.metaobjectDefinitionByType?.id) {
+    return byTypeJson.data.metaobjectDefinitionByType;
+  }
+
+  const listed = await graphql(
+    `
+      query ListMetaobjectDefinitions {
+        metaobjectDefinitions(first: 50) {
+          nodes {
+            id
+            type
+            name
+          }
+        }
+      }
+    `,
+  );
+  const listedJson = await listed.json();
+  const nodes = listedJson.data?.metaobjectDefinitions?.nodes ?? [];
+  return (
+    nodes.find(
+      (node) =>
+        node.type === METAOBJECT_TYPE || node.type?.endsWith("--product_qr"),
+    ) ?? null
+  );
+}
+
+async function ensureQrCodeDefinition(graphql) {
+  if (await findQrCodeDefinition(graphql)) {
+    return;
+  }
+
+  const created = await graphql(
+    `
+      mutation CreateQrCodeDefinition(
+        $definition: MetaobjectDefinitionCreateInput!
+      ) {
+        metaobjectDefinitionCreate(definition: $definition) {
+          metaobjectDefinition {
+            id
+            type
+          }
+          userErrors {
+            field
+            message
+            code
+          }
+        }
+      }
+    `,
+    {
+      variables: {
+        definition: {
+          name: "QR Code",
+          description: "QR codes that link to products",
+          type: METAOBJECT_TYPE,
+          access: {
+            admin: "MERCHANT_READ_WRITE",
+            storefront: "PUBLIC_READ",
+          },
+          fieldDefinitions: [
+            {
+              key: "title",
+              name: "Title",
+              type: "single_line_text_field",
+              required: true,
+            },
+            {
+              key: "product",
+              name: "Product",
+              type: "product_reference",
+            },
+            {
+              key: "product_variant",
+              name: "Product Variant",
+              type: "variant_reference",
+            },
+            {
+              key: "destination",
+              name: "Destination",
+              type: "single_line_text_field",
+            },
+            {
+              key: "scans",
+              name: "Scans",
+              type: "number_integer",
+            },
+          ],
+        },
+      },
+    },
+  );
+  const createdJson = await created.json();
+  const payload = createdJson.data?.metaobjectDefinitionCreate;
+  const errors = payload?.userErrors ?? [];
+  if (errors.length) {
+    if (await findQrCodeDefinition(graphql)) {
+      return;
+    }
+    throw new Error(errors[0].message);
+  }
+}
 
 export async function getQRCode(handle, graphql, shop) {
   const response = await graphql(
@@ -251,6 +367,8 @@ export function getDestinationUrl(qrCode, shop) {
 }
 
 export async function saveQRCode(handle, data, graphql) {
+  await ensureQrCodeDefinition(graphql);
+
   const response = await graphql(
     `
       mutation UpsertQRCode(

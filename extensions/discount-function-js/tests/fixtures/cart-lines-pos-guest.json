@@ -1,23 +1,31 @@
 {
   "payload": {
-    "export": "cart-delivery-options-discounts-generate-run",
-    "target": "cart.delivery-options.discounts.generate.run",
+    "export": "cart-lines-discounts-generate-run",
+    "target": "cart.lines.discounts.generate.run",
     "input": {
       "cart": {
         "attribute": {
           "value": "qr"
         },
         "buyerIdentity": null,
-        "deliveryGroups": [
+        "lines": [
           {
-            "id": "gid://shopify/CartDeliveryGroup/1"
+            "id": "gid://shopify/CartLine/0",
+            "cost": {
+              "subtotalAmount": {
+                "amount": "100.0"
+              }
+            },
+            "qrSrc": null
           }
         ],
-        "retailLocation": null
+        "retailLocation": {
+          "id": "gid://shopify/Location/1"
+        }
       },
       "discount": {
         "discountClasses": [
-          "SHIPPING"
+          "ORDER"
         ],
         "metafield": null
       },

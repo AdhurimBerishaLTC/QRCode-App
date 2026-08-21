@@ -3,7 +3,11 @@ query DeliveryInput {
     attribute(key: "src") {
       value
     }
+    retailLocation {
+      id
+    }
     buyerIdentity {
+      isAuthenticated
       customer {
         qrDiscountRedeemed: metafield(
           namespace: "$app"

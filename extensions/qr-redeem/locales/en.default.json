@@ -1,0 +1,19 @@
+{
+  "name": "QR Redeem",
+  "tile_heading": "Scan QR",
+  "tile_subheading": "Redeem a product QR code",
+  "tile_needs_customer": "Add a customer to redeem",
+  "modal_heading": "Scan QR",
+  "scan_prompt": "Point the camera at a product QR code.",
+  "looking_up": "Looking up QR code…",
+  "invalid_qr": "This QR is not a product code from this app.",
+  "not_found": "No QR code found for this scan.",
+  "missing_variant": "This QR code has no product variant.",
+  "needs_customer": "Add a customer with an account before scanning.",
+  "product_added": "Product added",
+  "added_toast": "QR product added to cart",
+  "added_banner": "Added to cart",
+  "add_failed": "Could not add this QR code to the cart.",
+  "scan_another": "Scan another",
+  "try_again": "Try again"
+}

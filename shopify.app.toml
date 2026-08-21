@@ -7,7 +7,7 @@ embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,read_orders,write_customers,write_metaobjects,write_metaobject_definitions,write_app_proxy,write_discounts,write_cart_transforms,write_payment_customizations,customer_read_orders,customer_write_orders, write_pixels, read_pixels, read_customer_events, read_products"
+scopes = "write_products,read_orders,write_customers,write_metaobjects,write_metaobject_definitions,read_metaobject_definitions,write_app_proxy,write_discounts,write_cart_transforms,write_payment_customizations,customer_read_orders,customer_write_orders, write_pixels, read_pixels, read_customer_events, read_products"
 
 [product.metafields.app.demo_info]
 type = "single_line_text_field"
@@ -25,32 +25,32 @@ description = "Tracks whether a customer has already redeemed the QR discount"
   [customer.metafields.app.qr_discount_redeemed.access]
   admin = "merchant_read_write"
 
-[metaobjects.app.qrcode]
+[metaobjects.app.product_qr]
 name = "QR Code"
 description = "QR codes that link to products"
 
-  [metaobjects.app.qrcode.access]
+  [metaobjects.app.product_qr.access]
   admin = "merchant_read_write"
   storefront = "public_read"
 
-[metaobjects.app.qrcode.fields.title]
+[metaobjects.app.product_qr.fields.title]
 name = "Title"
 type = "single_line_text_field"
 required = true
 
-[metaobjects.app.qrcode.fields.product]
+[metaobjects.app.product_qr.fields.product]
 name = "Product"
 type = "product_reference"
 
-[metaobjects.app.qrcode.fields.product_variant]
+[metaobjects.app.product_qr.fields.product_variant]
 name = "Product Variant"
 type = "variant_reference"
 
-[metaobjects.app.qrcode.fields.destination]
+[metaobjects.app.product_qr.fields.destination]
 name = "Destination"
 type = "single_line_text_field"
 
-[metaobjects.app.qrcode.fields.scans]
+[metaobjects.app.product_qr.fields.scans]
 name = "Scans"
 type = "number_integer"
 

@@ -8,7 +8,8 @@
           "value": "qr"
         },
         "buyerIdentity": null,
-        "lines": []
+        "lines": [],
+        "retailLocation": null
       },
       "discount": {
         "discountClasses": [

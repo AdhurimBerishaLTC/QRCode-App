@@ -10,13 +10,15 @@
         "buyerIdentity": {
           "customer": {
             "qrDiscountRedeemed": null
-          }
+          },
+          "isAuthenticated": true
         },
         "deliveryGroups": [
           {
             "id": "gid://shopify/DeliveryGroup/0"
           }
-        ]
+        ],
+        "retailLocation": null
       },
       "discount": {
         "discountClasses": [],
