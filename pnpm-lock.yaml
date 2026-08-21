@@ -203,6 +203,18 @@ importers:
         specifier: ^10.10.x
         version: 10.29.8
 
+  extensions/subscription-tutorial:
+    dependencies:
+      '@preact/signals':
+        specifier: ^2.3.x
+        version: 2.11.0(preact@10.29.8)
+      '@shopify/ui-extensions':
+        specifier: 2025.10.x
+        version: 2025.10.16(@preact/signals@2.11.0(preact@10.29.8))(preact@10.29.8)
+      preact:
+        specifier: ^10.10.x
+        version: 10.29.8
+
 packages:
 
   '@ardatan/relay-compiler@13.0.2':

@@ -1,0 +1,27 @@
+api_version = "2026-01"
+
+[[extensions]]
+type = "ui_extension"
+# Change the merchant-facing name of the extension in locales/en.default.json
+name = "Subscription Tutorial"
+uid = "491e011f-0ef6-4bab-aa87-e4d8be833fef82c139bf"
+handle = "subscription-tutorial"
+description = "POS UI extension subscription tutorial"
+
+# module: file that contains your extension’s source code
+# target: location where your extension appears in POS
+[[extensions.targeting]]
+module = "./src/Tile.jsx"
+target = "pos.home.tile.render"
+
+[[extensions.targeting]]
+module = "./src/Modal.jsx"
+target = "pos.home.modal.render"
+
+[[extensions.targeting]]
+module = "./src/Action.jsx"
+target = "pos.cart.line-item-details.action.render"
+
+[[extensions.targeting]]
+module = "./src/MenuItem.jsx"
+target = "pos.cart.line-item-details.action.menu-item.render"
