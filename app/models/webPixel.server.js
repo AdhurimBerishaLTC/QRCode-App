@@ -12,20 +12,22 @@ const parseSettings = (settings) => {
 
 export async function ensureWebPixelEndpoint(graphql, appUrl) {
   if (!appUrl) {
-    console.warn("[web pixel] SHOPIFY_APP_URL is missing; cannot sync endpoint");
+    console.warn(
+      "[web pixel] SHOPIFY_APP_URL is missing; cannot sync endpoint",
+    );
     return null;
   }
 
   const endpoint = `${String(appUrl).replace(/\/$/, "")}/pixel`;
-  const existingResponse = await graphql(
-    `#graphql
-      query WebPixel {
-        webPixel {
-          id
-          settings
-        }
-      }`,
-  );
+  const existingResponse = await graphql(`
+    #graphql
+    query WebPixel {
+      webPixel {
+        id
+        settings
+      }
+    }
+  `);
   const existingJson = await existingResponse.json();
   const existing = existingJson.data?.webPixel;
   const current = parseSettings(existing?.settings);
@@ -38,7 +40,8 @@ export async function ensureWebPixelEndpoint(graphql, appUrl) {
     }
 
     const updateResponse = await graphql(
-      `#graphql
+      `
+        #graphql
         mutation WebPixelUpdate($id: ID!, $webPixel: WebPixelInput!) {
           webPixelUpdate(id: $id, webPixel: $webPixel) {
             userErrors {
@@ -51,7 +54,8 @@ export async function ensureWebPixelEndpoint(graphql, appUrl) {
               settings
             }
           }
-        }`,
+        }
+      `,
       {
         variables: {
           id: existing.id,
@@ -71,7 +75,8 @@ export async function ensureWebPixelEndpoint(graphql, appUrl) {
   }
 
   const createResponse = await graphql(
-    `#graphql
+    `
+      #graphql
       mutation WebPixelCreate($webPixel: WebPixelInput!) {
         webPixelCreate(webPixel: $webPixel) {
           userErrors {
@@ -84,7 +89,8 @@ export async function ensureWebPixelEndpoint(graphql, appUrl) {
             settings
           }
         }
-      }`,
+      }
+    `,
     {
       variables: {
         webPixel: { settings },
