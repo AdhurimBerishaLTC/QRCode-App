@@ -26,6 +26,5 @@
   "add_to_cart": "Ajouter au panier",
   "cancel": "Annuler",
   "unknown_product": "Produit inconnu",
-  "default_variant": "Par défaut",
-  "currency": "$"
+  "default_variant": "Par défaut"
 }

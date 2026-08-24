@@ -1,7 +1,11 @@
 import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import { customerLabel, customerNumericId, searchCustomers } from "./FetchCustomer";
+import {
+  customerLabel,
+  customerNumericId,
+  searchCustomers,
+} from "./FetchCustomer";
 import { fetchQrCode, parseQrHandle, variantNumericId } from "./FetchQrCode";
 
 /**
@@ -279,7 +283,7 @@ function Modal() {
 
             <s-image src={pendingItem?.imageUrl ?? undefined} />
 
-            <s-stack direction="inline" gap="small">
+            <s-stack direction="inline" gap="small" alignItems="center">
               <s-button
                 variant="secondary"
                 onClick={() => setQuantity((q) => Math.max(1, q - 1))}
@@ -300,8 +304,9 @@ function Modal() {
             <s-text>{pendingItem?.variantTitle}</s-text>
 
             <s-text>
-              {shopify.i18n.translate("currency")}
-              {pendingItem?.price}
+              {shopify.i18n.formatCurrency(Number(pendingItem?.price ?? 0), {
+                currency: shopify.session.currentSession.currency,
+              })}
             </s-text>
 
             {hasCustomer ? (
@@ -337,19 +342,21 @@ function Modal() {
                   <s-text>{i18n.translate("looking_up")}</s-text>
                 ) : null}
                 {customerMessage ? <s-text>{customerMessage}</s-text> : null}
-                {customerResults.map((customer) => (
-                  <s-clickable
-                    key={customer.id}
-                    disabled={attachingCustomer}
-                    onClick={() => attachCustomer(customer)}
-                  >
-                    <s-stack direction="block" gap="none">
-                      <s-text>{customerLabel(customer)}</s-text>
-                      <s-text>
-                        {customer.defaultEmailAddress?.emailAddress || ""}
-                      </s-text>
-                    </s-stack>
-                  </s-clickable>
+                {customerResults.map((customer, index) => (
+                  <s-stack key={customer.id} direction="block" gap="none">
+                    {index > 0 ? <s-divider /> : null}
+                    <s-clickable
+                      disabled={attachingCustomer}
+                      onClick={() => attachCustomer(customer)}
+                    >
+                      <s-stack direction="block" gap="none">
+                        <s-text>{customerLabel(customer)}</s-text>
+                        <s-text>
+                          {customer.defaultEmailAddress?.emailAddress || ""}
+                        </s-text>
+                      </s-stack>
+                    </s-clickable>
+                  </s-stack>
                 ))}
               </s-stack>
             )}
