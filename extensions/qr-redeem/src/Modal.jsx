@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "preact/hooks";
 import {
   customerLabel,
   customerNumericId,
+  fetchCustomerQrStatus,
+  isCustomerQrRedeemed,
   searchCustomers,
 } from "./FetchCustomer";
 import { fetchQrCode, parseQrHandle, variantNumericId } from "./FetchQrCode";
@@ -49,6 +51,7 @@ function Modal() {
   const [searchingCustomers, setSearchingCustomers] = useState(false);
   const [attachingCustomer, setAttachingCustomer] = useState(false);
   const [customerMessage, setCustomerMessage] = useState("");
+  const [customerAlreadyRedeemed, setCustomerAlreadyRedeemed] = useState(false);
   const lastScanned = useRef("");
 
   useEffect(() => {
@@ -57,6 +60,34 @@ function Modal() {
     });
     return unsubscribe;
   }, []);
+
+  useEffect(() => {
+    if (status !== "confirm" || !hasCustomer) return;
+
+    const cartCustomerId = shopify.cart.current.value?.customer?.id;
+    if (!cartCustomerId) {
+      setCustomerAlreadyRedeemed(false);
+      return;
+    }
+
+    let cancelled = false;
+    (async () => {
+      try {
+        const customer = await fetchCustomerQrStatus(cartCustomerId);
+        if (!cancelled) {
+          setCustomerAlreadyRedeemed(isCustomerQrRedeemed(customer));
+        }
+      } catch {
+        if (!cancelled) {
+          setCustomerAlreadyRedeemed(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [status, hasCustomer]);
 
   useEffect(() => {
     scanner.showCameraScanner();
@@ -125,6 +156,7 @@ function Modal() {
         setCustomerResults([]);
         setCustomerQuery("");
         setCustomerMessage("");
+        setCustomerAlreadyRedeemed(false);
         setStatus("confirm");
       } catch {
         setMessage(i18n.translate("add_failed"));
@@ -210,6 +242,7 @@ function Modal() {
 
     try {
       await shopify.cart.setCustomer({ id });
+      setCustomerAlreadyRedeemed(isCustomerQrRedeemed(customer));
       setCustomerResults([]);
     } catch {
       setCustomerMessage(i18n.translate("attach_failed"));
@@ -258,6 +291,7 @@ function Modal() {
     setCustomerResults([]);
     setCustomerQuery("");
     setCustomerMessage("");
+    setCustomerAlreadyRedeemed(false);
     setStatus("scanning");
     scanner.showCameraScanner();
   };
@@ -310,10 +344,21 @@ function Modal() {
             </s-text>
 
             {hasCustomer ? (
-              <s-banner
-                heading={i18n.translate("customer_attached")}
-                tone="success"
-              />
+              <s-stack direction="block" gap="small">
+                {customerAlreadyRedeemed ? (
+                  <s-banner
+                    heading={i18n.translate("already_redeemed_banner")}
+                    tone="info"
+                  >
+                    <s-text>{i18n.translate("already_redeemed_hint")}</s-text>
+                  </s-banner>
+                ) : (
+                  <s-banner
+                    heading={i18n.translate("customer_attached")}
+                    tone="success"
+                  />
+                )}
+              </s-stack>
             ) : (
               <s-stack direction="block" gap="small">
                 <s-banner
@@ -342,22 +387,30 @@ function Modal() {
                   <s-text>{i18n.translate("looking_up")}</s-text>
                 ) : null}
                 {customerMessage ? <s-text>{customerMessage}</s-text> : null}
-                {customerResults.map((customer, index) => (
-                  <s-stack key={customer.id} direction="block" gap="none">
-                    {index > 0 ? <s-divider /> : null}
-                    <s-clickable
-                      disabled={attachingCustomer}
-                      onClick={() => attachCustomer(customer)}
-                    >
-                      <s-stack direction="block" gap="none">
-                        <s-text>{customerLabel(customer)}</s-text>
-                        <s-text>
-                          {customer.defaultEmailAddress?.emailAddress || ""}
-                        </s-text>
-                      </s-stack>
-                    </s-clickable>
-                  </s-stack>
-                ))}
+                {customerResults.map((customer, index) => {
+                  const alreadyRedeemed = isCustomerQrRedeemed(customer);
+                  return (
+                    <s-stack key={customer.id} direction="block" gap="none">
+                      {index > 0 ? <s-divider /> : null}
+                      <s-clickable
+                        disabled={attachingCustomer}
+                        onClick={() => attachCustomer(customer)}
+                      >
+                        <s-stack direction="block" gap="none">
+                          <s-text>{customerLabel(customer)}</s-text>
+                          <s-text>
+                            {customer.defaultEmailAddress?.emailAddress || ""}
+                          </s-text>
+                          {alreadyRedeemed ? (
+                            <s-text>
+                              {i18n.translate("already_redeemed")}
+                            </s-text>
+                          ) : null}
+                        </s-stack>
+                      </s-clickable>
+                    </s-stack>
+                  );
+                })}
               </s-stack>
             )}
 

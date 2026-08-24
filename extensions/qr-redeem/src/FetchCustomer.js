@@ -5,6 +5,7 @@
  *   lastName?: string | null
  *   defaultEmailAddress?: { emailAddress?: string | null } | null
  *   legacyResourceId?: string | number | null
+ *   qrDiscountRedeemed?: { jsonValue?: boolean | string | null } | null
  * }} CustomerNode
  *
  * @typedef {{
@@ -12,6 +13,7 @@
  *     customers?: {
  *       nodes?: CustomerNode[]
  *     } | null
+ *     customer?: CustomerNode | null
  *   } | null
  *   errors?: Array<{ message?: string } | null> | null
  * }} SearchCustomersResponse
@@ -28,6 +30,12 @@ const CUSTOMERS_WITH_DETAILS = `#graphql
           emailAddress
         }
         legacyResourceId
+        qrDiscountRedeemed: metafield(
+          namespace: "$app"
+          key: "qr_discount_redeemed"
+        ) {
+          jsonValue
+        }
       }
     }
   }
@@ -44,17 +52,32 @@ const CUSTOMERS_IDS_ONLY = `#graphql
   }
 `;
 
+const CUSTOMER_QR_STATUS = `#graphql
+  query CustomerQrStatus($id: ID!) {
+    customer(id: $id) {
+      id
+      legacyResourceId
+      qrDiscountRedeemed: metafield(
+        namespace: "$app"
+        key: "qr_discount_redeemed"
+      ) {
+        jsonValue
+      }
+    }
+  }
+`;
+
 /**
  * @param {string} queryDocument
- * @param {string} query
+ * @param {Record<string, unknown>} variables
  * @returns {Promise<SearchCustomersResponse>}
  */
-async function postCustomersQuery(queryDocument, query) {
+async function postAdminQuery(queryDocument, variables) {
   const response = await fetch("shopify:admin/api/graphql.json", {
     method: "POST",
     body: JSON.stringify({
       query: queryDocument,
-      variables: { query },
+      variables,
     }),
   });
 
@@ -108,11 +131,20 @@ function isProtectedFieldError(message) {
 }
 
 /**
+ * @param {CustomerNode | null | undefined} customer
+ * @returns {boolean}
+ */
+export function isCustomerQrRedeemed(customer) {
+  const value = customer?.qrDiscountRedeemed?.jsonValue;
+  return value === true || value === "true";
+}
+
+/**
  * @param {string} query
  * @returns {Promise<CustomerNode[]>}
  */
 export async function searchCustomers(query) {
-  const detailed = await postCustomersQuery(CUSTOMERS_WITH_DETAILS, query);
+  const detailed = await postAdminQuery(CUSTOMERS_WITH_DETAILS, { query });
   const detailedNodes = detailed.data?.customers?.nodes ?? [];
   if (detailedNodes.length) {
     return detailedNodes;
@@ -120,11 +152,27 @@ export async function searchCustomers(query) {
 
   const detailedError = detailed.errors?.[0]?.message ?? "";
   if (detailedError && isProtectedFieldError(detailedError)) {
-    const basic = await postCustomersQuery(CUSTOMERS_IDS_ONLY, query);
+    const basic = await postAdminQuery(CUSTOMERS_IDS_ONLY, { query });
     return nodesOrThrow(basic);
   }
 
   return nodesOrThrow(detailed);
+}
+
+/**
+ * @param {number | string} customerId
+ * @returns {Promise<CustomerNode | null>}
+ */
+export async function fetchCustomerQrStatus(customerId) {
+  const id = String(customerId).startsWith("gid://")
+    ? String(customerId)
+    : `gid://shopify/Customer/${customerId}`;
+
+  const json = await postAdminQuery(CUSTOMER_QR_STATUS, { id });
+  if (json.errors?.[0]?.message) {
+    throw new Error(json.errors[0].message);
+  }
+  return json.data?.customer ?? null;
 }
 
 /**
