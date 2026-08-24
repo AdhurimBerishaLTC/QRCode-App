@@ -43,6 +43,7 @@ export default async () => {
       ? new URL(intents?.launchUrl)?.searchParams?.get("issueId")
       : null;
     const [loading, setLoading] = useState(issueId ? true : false);
+    const [loadingRecommended, setLoadingRecommended] = useState(false);
     const [issue, setIssue] = useState(
       /** @type {IssueForm} */ ({ title: "", description: "", id: issueId }),
     );
@@ -59,6 +60,36 @@ export default async () => {
         setAllIssues(issues || []);
       });
     }, []);
+
+    const getIssueRecommendation = useCallback(async () => {
+      // Get a recommended issue title and description from your app's backend
+      setLoadingRecommended(true);
+      try {
+        // fetch is automatically authenticated and the path is resolved against your app's URL
+        const productId = encodeURIComponent(data.selected[0].id);
+        const res = await fetch(
+          `/api/recommendedProductIssue?productId=${productId}`,
+        );
+
+        if (!res.ok) {
+          console.error("Network error");
+          return;
+        }
+
+        const json = await res.json();
+        if (json?.productIssue) {
+          setIssue((prev) => ({
+            ...prev,
+            title: json.productIssue.title ?? "",
+            description: json.productIssue.description ?? "",
+          }));
+        }
+      } catch (error) {
+        console.error("Failed to generate issue", error);
+      } finally {
+        setLoadingRecommended(false);
+      }
+    }, [data.selected]);
 
     const onSubmit = useCallback(async () => {
       const { isValid, errors } = validateForm(issue);
@@ -124,6 +155,22 @@ export default async () => {
         >
           {i18n.translate("issue-cancel-button")}
         </s-button>
+        <s-stack direction="block">
+          <s-banner>
+            <s-stack direction="block">
+              <s-text>{i18n.translate("issue-generate-banner-text")}</s-text>
+              <s-stack direction="inline">
+                <s-button
+                  disabled={loadingRecommended}
+                  onClick={getIssueRecommendation}
+                >
+                  {i18n.translate("issue-generate-button")}
+                </s-button>
+                {loadingRecommended && <s-spinner />}
+              </s-stack>
+            </s-stack>
+          </s-banner>
+        </s-stack>
         <s-text-field
           value={title}
           error={
