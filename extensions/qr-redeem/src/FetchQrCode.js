@@ -8,7 +8,14 @@ const METAOBJECT_TYPE = "$app:product_qr";
  *       title?: { jsonValue?: string | null }
  *       product?: { reference?: { title?: string } | null }
  *       productVariant?: {
- *         reference?: { id?: string; legacyResourceId?: string | number } | null
+ *         reference?: {
+ *           id?: string
+ *           legacyResourceId?: string | number
+ *           title?: string
+ *           price?: string
+ *           image?: { url?: string } | null
+ *           product?: { featuredImage?: { url?: string } | null } | null
+ *         } | null
  *       }
  *     } | null
  *   }
@@ -38,6 +45,16 @@ export async function fetchQrCode(handle) {
                 ... on ProductVariant {
                   id
                   legacyResourceId
+                  title
+                  price
+                  image {
+                    url
+                  }
+                  product {
+                    featuredImage {
+                      url
+                    }
+                  }
                 }
               }
             }

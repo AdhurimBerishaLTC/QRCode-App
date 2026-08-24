@@ -6,7 +6,14 @@ import { fetchQrCode, parseQrHandle, variantNumericId } from "./FetchQrCode";
 /**
  * @typedef {"scanning" | "loading" | "confirm" | "success" | "error"} RedeemStatus
  * @typedef {{ data?: string }} ScanResult
- * @typedef {{ variantId: number, productTitle: string, handle: string }} PendingItem
+ * @typedef {{
+ *   variantId: number,
+ *   productTitle: string,
+ *   handle: string,
+ *   variantTitle: string,
+ *   price: string | null,
+ *   imageUrl: string | null
+ * }} PendingItem
  */
 
 export default async () => {
@@ -64,12 +71,33 @@ function Modal() {
           return;
         }
 
+        const variantRef = metaobject.productVariant?.reference;
+
+        const variantTitle =
+          variantRef?.title && variantRef.title !== "Default Title"
+            ? variantRef.title
+            : i18n.translate("default_variant");
+
+        const price = variantRef?.price ?? null;
+
+        const imageUrl =
+          variantRef?.image?.url ??
+          variantRef?.product?.featuredImage?.url ??
+          null;
+
         const productTitle =
           metaobject.product?.reference?.title ||
           metaobject.title?.jsonValue ||
           i18n.translate("unknown_product");
 
-        setPendingItem({ variantId, productTitle, handle });
+        setPendingItem({
+          variantId,
+          handle,
+          productTitle,
+          variantTitle,
+          price,
+          imageUrl,
+        });
         setQuantity(1);
         setStatus("confirm");
       } catch {
@@ -143,6 +171,9 @@ function Modal() {
         <s-scroll-box>
           <s-stack direction="block" gap="base" padding="small">
             <s-text>{pendingItem?.productTitle}</s-text>
+
+            <s-image src={pendingItem?.imageUrl ?? undefined} />
+
             <s-stack direction="inline" gap="small">
               <s-button
                 variant="secondary"
@@ -150,7 +181,9 @@ function Modal() {
               >
                 −
               </s-button>
+
               <s-text>{quantity}</s-text>
+
               <s-button
                 variant="secondary"
                 onClick={() => setQuantity((q) => Math.min(99, q + 1))}
@@ -158,9 +191,18 @@ function Modal() {
                 +
               </s-button>
             </s-stack>
+
+            <s-text>{pendingItem?.variantTitle}</s-text>
+
+            <s-text>
+              {shopify.i18n.translate("currency")}
+              {pendingItem?.price}
+            </s-text>
+
             <s-button variant="primary" onClick={handleConfirm}>
               {i18n.translate("add_to_cart")}
             </s-button>
+
             <s-button variant="secondary" onClick={rescan}>
               {i18n.translate("cancel")}
             </s-button>
@@ -176,7 +218,9 @@ function Modal() {
         <s-scroll-box>
           <s-stack direction="block" gap="small">
             <s-banner heading={i18n.translate("added_banner")} tone="success" />
+
             <s-text>{message}</s-text>
+
             <s-button onClick={rescan}>
               {i18n.translate("scan_another")}
             </s-button>
@@ -192,6 +236,7 @@ function Modal() {
         <s-scroll-box>
           <s-stack direction="block" gap="small">
             <s-banner heading={message} tone="critical" />
+
             <s-button onClick={rescan}>{i18n.translate("try_again")}</s-button>
           </s-stack>
         </s-scroll-box>

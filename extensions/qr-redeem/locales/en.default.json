@@ -18,5 +18,7 @@
   "try_again": "Try again",
   "add_to_cart": "Add to Cart",
   "cancel": "Cancel",
-  "unknown_product": "Unknown Product"
+  "unknown_product": "Unknown Product",
+  "default_variant": "Default",
+  "currency": "$"
 }
