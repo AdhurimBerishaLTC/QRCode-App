@@ -17,3 +17,15 @@ target = "pos.home.tile.render"
 [[extensions.targeting]]
 module = "./src/Modal.jsx"
 target = "pos.home.modal.render"
+
+[[extensions.targeting]]
+module = "./src/LineMenuItem.jsx"
+target = "pos.cart.line-item-details.action.menu-item.render"
+
+[[extensions.targeting]]
+module = "./src/LineAction.jsx"
+target = "pos.cart.line-item-details.action.render"
+
+[[extensions.targeting]]
+module = "./src/CustomerBlock.jsx"
+target = "pos.customer-details.block.render"

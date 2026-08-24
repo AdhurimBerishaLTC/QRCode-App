@@ -29,5 +29,18 @@
   "add_to_cart": "Ajouter au panier",
   "cancel": "Annuler",
   "unknown_product": "Produit inconnu",
-  "default_variant": "Par défaut"
+  "default_variant": "Par défaut",
+  "line_menu_label": "Code QR",
+  "line_modal_heading": "Code QR",
+  "line_qr_banner": "Ajouté via QR",
+  "line_qr_handle": "Identifiant",
+  "line_not_qr_banner": "Non ajouté depuis un scan QR",
+  "line_not_qr_hint": "Cette ligne n’a pas de propriétés QR, elle ne comptera pas pour la réduction QR en magasin.",
+  "line_remove_attribution": "Retirer l’attribution QR",
+  "line_attribution_removed_toast": "Attribution QR retirée",
+  "line_remove_failed": "Impossible de retirer l’attribution QR.",
+  "customer_block_heading": "Réduction QR",
+  "customer_block_available": "Réduction QR disponible",
+  "customer_block_redeemed": "Déjà utilisée",
+  "customer_block_unavailable": "Impossible de charger le statut de la réduction QR."
 }

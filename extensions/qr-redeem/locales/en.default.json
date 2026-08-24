@@ -29,5 +29,18 @@
   "add_to_cart": "Add to Cart",
   "cancel": "Cancel",
   "unknown_product": "Unknown Product",
-  "default_variant": "Default"
+  "default_variant": "Default",
+  "line_menu_label": "QR code",
+  "line_modal_heading": "QR code",
+  "line_qr_banner": "Added via QR",
+  "line_qr_handle": "Handle",
+  "line_not_qr_banner": "Not added from a QR scan",
+  "line_not_qr_hint": "This line has no QR properties, so it won’t count toward the in-store QR discount.",
+  "line_remove_attribution": "Remove QR attribution",
+  "line_attribution_removed_toast": "QR attribution removed",
+  "line_remove_failed": "Could not remove QR attribution.",
+  "customer_block_heading": "QR discount",
+  "customer_block_available": "QR discount available",
+  "customer_block_redeemed": "Already redeemed",
+  "customer_block_unavailable": "Could not load QR discount status."
 }
