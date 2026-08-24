@@ -1,112 +1,82 @@
 import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
-import {
-  fetchQrCode,
-  parseQrHandle,
-  variantNumericId,
-} from "./FetchQrCode";
+import { fetchQrCode, parseQrHandle, variantNumericId } from "./FetchQrCode";
 
 /**
- * @typedef {"scanning" | "loading" | "success" | "error"} RedeemStatus
+ * @typedef {"scanning" | "loading" | "confirm" | "success" | "error"} RedeemStatus
  * @typedef {{ data?: string }} ScanResult
+ * @typedef {{ variantId: number, productTitle: string, handle: string }} PendingItem
  */
 
 export default async () => {
   render(<Modal />, document.body);
 };
 
-/**
- * @returns {typeof shopify.scanner & { showCameraScanner: () => void; hideCameraScanner: () => void }}
- */
 function cameraScanner() {
-  return /** @type {typeof shopify.scanner & { showCameraScanner: () => void; hideCameraScanner: () => void }} */ (
-    shopify.scanner
-  );
+  return shopify.scanner;
 }
 
 function Modal() {
   const { i18n } = shopify;
   const scanner = cameraScanner();
-  const [status, setStatus] = useState(
-    /** @type {RedeemStatus} */ ("scanning"),
-  );
+  const [status, setStatus] = useState("scanning");
   const [message, setMessage] = useState("");
+  const [quantity, setQuantity] = useState(1);
+  const [pendingItem, setPendingItem] = useState(
+    /** @type {PendingItem | null} */ (null),
+  );
   const lastScanned = useRef("");
 
   useEffect(() => {
     scanner.showCameraScanner();
 
-    const unsubscribe = scanner.scannerData.current.subscribe(
-      async (/** @type {ScanResult} */ scan) => {
-        if (!scan.data || scan.data === lastScanned.current) {
-          return;
-        }
-        lastScanned.current = scan.data;
+    const unsubscribe = scanner.scannerData.current.subscribe(async (scan) => {
+      if (!scan.data || scan.data === lastScanned.current) return;
+      lastScanned.current = scan.data;
 
-        setStatus("loading");
-        scanner.hideCameraScanner();
+      setStatus("loading");
+      scanner.hideCameraScanner();
 
-        if (!shopify.cart.current.value.customer) {
-          setMessage(i18n.translate("needs_customer"));
+      const handle = parseQrHandle(scan.data);
+      if (!handle) {
+        setMessage(i18n.translate("invalid_qr"));
+        setStatus("error");
+        return;
+      }
+
+      try {
+        const result = await fetchQrCode(handle);
+        const metaobject = result.data?.metaobjectByHandle;
+        if (!metaobject) {
+          setMessage(i18n.translate("not_found"));
           setStatus("error");
           return;
         }
 
-        const handle = parseQrHandle(scan.data);
-        if (!handle) {
-          setMessage(i18n.translate("invalid_qr"));
+        const variantId =
+          Number(metaobject.productVariant?.reference?.legacyResourceId) ||
+          variantNumericId(metaobject.productVariant?.reference?.id);
+
+        if (!variantId) {
+          setMessage(i18n.translate("missing_variant"));
           setStatus("error");
           return;
         }
 
-        try {
-          const result = await fetchQrCode(handle);
-          const metaobject = result.data?.metaobjectByHandle;
-          if (!metaobject) {
-            setMessage(i18n.translate("not_found"));
-            setStatus("error");
-            return;
-          }
+        const productTitle =
+          metaobject.product?.reference?.title ||
+          metaobject.title?.jsonValue ||
+          i18n.translate("unknown_product");
 
-          const variantId =
-            Number(metaobject.productVariant?.reference?.legacyResourceId) ||
-            variantNumericId(metaobject.productVariant?.reference?.id);
-
-          if (!variantId) {
-            setMessage(i18n.translate("missing_variant"));
-            setStatus("error");
-            return;
-          }
-
-          const uuid = await shopify.cart.addLineItem(variantId, 1);
-          if (!uuid) {
-            setMessage(i18n.translate("add_failed"));
-            setStatus("error");
-            return;
-          }
-          await shopify.cart.addLineItemProperties(uuid, {
-            src: "qr",
-            qr_code: handle,
-          });
-          await shopify.cart.addCartProperties({
-            src: "qr",
-            qr_code: handle,
-          });
-
-          setMessage(
-            metaobject.product?.reference?.title ||
-              metaobject.title?.jsonValue ||
-              i18n.translate("product_added"),
-          );
-          setStatus("success");
-          shopify.toast.show(i18n.translate("added_toast"));
-        } catch {
-          setMessage(i18n.translate("add_failed"));
-          setStatus("error");
-        }
-      },
-    );
+        setPendingItem({ variantId, productTitle, handle });
+        setQuantity(1);
+        setStatus("confirm");
+      } catch {
+        setMessage(i18n.translate("add_failed"));
+        setStatus("error");
+      }
+    });
 
     return () => {
       unsubscribe();
@@ -114,8 +84,42 @@ function Modal() {
     };
   }, []);
 
+  const handleConfirm = async () => {
+    if (!pendingItem) return;
+    setStatus("loading");
+
+    try {
+      const uuid = await shopify.cart.addLineItem(
+        pendingItem.variantId,
+        quantity,
+      );
+      if (!uuid) {
+        setMessage(i18n.translate("add_failed"));
+        setStatus("error");
+        return;
+      }
+      await shopify.cart.addLineItemProperties(uuid, {
+        src: "qr",
+        qr_code: pendingItem.handle,
+      });
+      await shopify.cart.addCartProperties({
+        src: "qr",
+        qr_code: pendingItem.handle,
+      });
+
+      setMessage(pendingItem.productTitle);
+      setStatus("success");
+      shopify.toast.show(i18n.translate("added_toast"));
+    } catch {
+      setMessage(i18n.translate("add_failed"));
+      setStatus("error");
+    }
+  };
+
   const rescan = () => {
     lastScanned.current = "";
+    setPendingItem(null);
+    setQuantity(1);
     setMessage("");
     setStatus("scanning");
     scanner.showCameraScanner();
@@ -133,6 +137,39 @@ function Modal() {
     );
   }
 
+  if (status === "confirm") {
+    return (
+      <s-page heading={i18n.translate("modal_heading")}>
+        <s-scroll-box>
+          <s-stack direction="block" gap="base" padding="small">
+            <s-text>{pendingItem?.productTitle}</s-text>
+            <s-stack direction="inline" gap="small">
+              <s-button
+                variant="secondary"
+                onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+              >
+                −
+              </s-button>
+              <s-text>{quantity}</s-text>
+              <s-button
+                variant="secondary"
+                onClick={() => setQuantity((q) => Math.min(99, q + 1))}
+              >
+                +
+              </s-button>
+            </s-stack>
+            <s-button variant="primary" onClick={handleConfirm}>
+              {i18n.translate("add_to_cart")}
+            </s-button>
+            <s-button variant="secondary" onClick={rescan}>
+              {i18n.translate("cancel")}
+            </s-button>
+          </s-stack>
+        </s-scroll-box>
+      </s-page>
+    );
+  }
+
   if (status === "success") {
     return (
       <s-page heading={i18n.translate("modal_heading")}>
@@ -140,7 +177,9 @@ function Modal() {
           <s-stack direction="block" gap="small">
             <s-banner heading={i18n.translate("added_banner")} tone="success" />
             <s-text>{message}</s-text>
-            <s-button onClick={rescan}>{i18n.translate("scan_another")}</s-button>
+            <s-button onClick={rescan}>
+              {i18n.translate("scan_another")}
+            </s-button>
           </s-stack>
         </s-scroll-box>
       </s-page>

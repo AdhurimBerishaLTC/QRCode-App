@@ -15,5 +15,8 @@
   "added_banner": "Added to cart",
   "add_failed": "Could not add this QR code to the cart.",
   "scan_another": "Scan another",
-  "try_again": "Try again"
+  "try_again": "Try again",
+  "add_to_cart": "Add to Cart",
+  "cancel": "Cancel",
+  "unknown_product": "Unknown Product"
 }
