@@ -18,7 +18,9 @@ const PAGE_SIZE = 3;
  * @param {Issue[]} list
  */
 function statusKey(list) {
-  return list.map((issue) => `${issue.id}:${issue.completed ? "1" : "0"}`).join(",");
+  return list
+    .map((issue) => `${issue.id}:${issue.completed ? "1" : "0"}`)
+    .join(",");
 }
 
 function Extension() {
@@ -27,7 +29,9 @@ function Extension() {
 
   const [loading, setLoading] = useState(Boolean(productId));
   const [issues, setIssues] = useState(/** @type {Issue[]} */ ([]));
-  const [initialIssues, setInitialIssues] = useState(/** @type {Issue[]} */ ([]));
+  const [initialIssues, setInitialIssues] = useState(
+    /** @type {Issue[]} */ ([]),
+  );
   const [currentPage, setCurrentPage] = useState(1);
 
   const issuesCount = issues.length;
@@ -140,67 +144,104 @@ function Extension() {
               value={currentStatusKey}
             />
           </s-box>
-          <s-table
-            paginate
-            hasNextPage={currentPage < totalPages}
-            hasPreviousPage={currentPage > 1}
-            onNextPage={() => setCurrentPage(currentPage + 1)}
-            onPreviousPage={() => setCurrentPage(currentPage - 1)}
-          >
-            <s-table-header-row>
-              <s-table-header listSlot="primary">
-                {i18n.translate("issue-column-heading")}
-              </s-table-header>
-              <s-table-header>
-                {i18n.translate("status-column-heading")}
-              </s-table-header>
-              <s-table-header></s-table-header>
-            </s-table-header-row>
-            <s-table-body>
-              {paginatedIssues.map(({ id, title, description, completed }) => (
-                <s-table-row key={id}>
-                  <s-table-cell>
-                    <s-stack direction="block" gap="small-100">
-                      <s-heading accessibilityRole="presentation">
-                        {title}
-                      </s-heading>
-                      <s-text color="subdued">{description}</s-text>
-                    </s-stack>
-                  </s-table-cell>
-                  <s-table-cell>
-                    <s-select
-                      name={`issue-status-${id}`}
-                      labelAccessibilityVisibility="exclusive"
-                      label={i18n.translate("select-label")}
-                      value={completed ? "completed" : "todo"}
-                      onChange={(event) =>
-                        handleChange(id, event.currentTarget.value)
-                      }
-                    >
-                      <s-option value="todo">
-                        {i18n.translate("option-todo")}
-                      </s-option>
-                      <s-option value="completed">
-                        {i18n.translate("option-completed")}
-                      </s-option>
-                    </s-select>
-                  </s-table-cell>
-                  <s-table-cell>
-                    <s-button
-                      variant="tertiary"
-                      icon="delete"
-                      accessibilityLabel={i18n.translate("delete-issue-button")}
-                      onClick={() => handleDelete(id)}
-                    />
-                  </s-table-cell>
-                </s-table-row>
-              ))}
-            </s-table-body>
-          </s-table>
+          {paginatedIssues.length > 0 ? (
+            <>
+              <s-table
+                paginate
+                hasNextPage={currentPage < totalPages}
+                hasPreviousPage={currentPage > 1}
+                onNextPage={() => setCurrentPage(currentPage + 1)}
+                onPreviousPage={() => setCurrentPage(currentPage - 1)}
+              >
+                <s-table-header-row>
+                  <s-table-header listSlot="primary">
+                    {i18n.translate("issue-column-heading")}
+                  </s-table-header>
+                  <s-table-header>
+                    {i18n.translate("status-column-heading")}
+                  </s-table-header>
+                  <s-table-header></s-table-header>
+                </s-table-header-row>
+                <s-table-body>
+                  {paginatedIssues.map(
+                    ({ id, title, description, completed }) => (
+                      <s-table-row key={id}>
+                        <s-table-cell>
+                          <s-stack direction="block" gap="small-100">
+                            <s-heading accessibilityRole="presentation">
+                              {title}
+                            </s-heading>
+                            <s-text color="subdued">{description}</s-text>
+                          </s-stack>
+                        </s-table-cell>
+                        <s-table-cell>
+                          <s-select
+                            name={`issue-status-${id}`}
+                            labelAccessibilityVisibility="exclusive"
+                            label={i18n.translate("select-label")}
+                            value={completed ? "completed" : "todo"}
+                            onChange={(event) =>
+                              handleChange(id, event.currentTarget.value)
+                            }
+                          >
+                            <s-option value="todo">
+                              {i18n.translate("option-todo")}
+                            </s-option>
+                            <s-option value="completed">
+                              {i18n.translate("option-completed")}
+                            </s-option>
+                          </s-select>
+                        </s-table-cell>
+                        <s-table-cell>
+                          <s-button
+                            variant="tertiary"
+                            icon="edit"
+                            accessibilityLabel={i18n.translate(
+                              "edit-issue-button",
+                            )}
+                            onClick={() => {
+                              const url = `extension:issue-tracker-action?issueId=${id}`;
+                              navigation?.navigate(url);
+                            }}
+                          />
+                        </s-table-cell>
+                        <s-table-cell>
+                          <s-button
+                            variant="tertiary"
+                            icon="delete"
+                            accessibilityLabel={i18n.translate(
+                              "delete-issue-button",
+                            )}
+                            onClick={() => handleDelete(id)}
+                          />
+                        </s-table-cell>
+                      </s-table-row>
+                    ),
+                  )}
+                </s-table-body>
+              </s-table>
+              <s-button
+                onClick={() => {
+                  const url = `extension:issue-tracker-action`;
+                  navigation?.navigate(url);
+                }}
+              >
+                {i18n.translate("add-issue-button")}
+              </s-button>
+            </>
+          ) : (
+            <>
+              <s-button
+                onClick={() => {
+                  const url = `extension:issue-tracker-action`;
+                  navigation?.navigate(url);
+                }}
+              >
+                {i18n.translate("add-issue-button")}
+              </s-button>
+            </>
+          )}
         </s-form>
-        <s-button onClick={openCreateIssue}>
-          {i18n.translate("add-issue-button")}
-        </s-button>
       </s-stack>
     );
   }

@@ -1,10 +1,16 @@
+import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useCallback, useEffect, useState } from "preact/hooks";
 import { getIssues, updateIssues } from "./utils";
 
 /**
  * @typedef {import("./utils").Issue} Issue
- * @typedef {{ title: string, description: string }} IssueForm
+ * @typedef {{
+ *   title: string
+ *   description: string
+ *   id?: number | string | null
+ *   completed?: boolean
+ * }} IssueForm
  * @typedef {{ title: boolean, description: boolean }} FormErrors
  */
 
@@ -32,21 +38,26 @@ export default async () => {
   }
 
   function Extension() {
-    const { close, data, i18n } = shopify;
+    const { close, data, i18n, intents } = shopify;
+    const issueId = intents?.launchUrl
+      ? new URL(intents?.launchUrl)?.searchParams?.get("issueId")
+      : null;
+    const [loading, setLoading] = useState(issueId ? true : false);
     const [issue, setIssue] = useState(
-      /** @type {IssueForm} */ ({ title: "", description: "" }),
+      /** @type {IssueForm} */ ({ title: "", description: "", id: issueId }),
     );
     const [allIssues, setAllIssues] = useState(/** @type {Issue[]} */ ([]));
     const [formErrors, setFormErrors] = useState(
       /** @type {FormErrors | null} */ (null),
     );
     const { title, description } = issue;
+    const isEditing = Boolean(issueId);
 
     useEffect(() => {
-      getIssues(data.selected[0].id).then((issues) =>
-        setAllIssues(issues || []),
-      );
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+      getIssues(data.selected[0].id).then((issues) => {
+        setLoading(false);
+        setAllIssues(issues || []);
+      });
     }, []);
 
     const onSubmit = useCallback(async () => {
@@ -54,26 +65,63 @@ export default async () => {
       setFormErrors(errors);
 
       if (isValid) {
-        // Commit changes to the database
-        await updateIssues(data.selected[0].id, [
-          ...allIssues,
-          {
+        const newIssues = [...allIssues];
+
+        if (isEditing) {
+          const editingIssueIndex = newIssues.findIndex(
+            (listIssue) => `${listIssue.id}` === `${issue.id}`,
+          );
+
+          newIssues[editingIssueIndex] = {
+            ...newIssues[editingIssueIndex],
+            title,
+            description,
+          };
+        } else {
+          newIssues.push({
             id: generateId(allIssues),
+            title,
+            description,
             completed: false,
-            ...issue,
-          },
-        ]);
-        // Close the modal using the 'close' API
+          });
+        }
+
+        await updateIssues(data.selected[0].id, newIssues);
+
         close();
       }
-    }, [issue, data.selected, allIssues, close]);
+    }, [issue, data.selected, allIssues, close, isEditing, title, description]);
+
+    useEffect(() => {
+      if (issueId) {
+        const editingIssue = allIssues.find(({ id }) => `${id}` === issueId);
+        if (editingIssue) {
+          setIssue(editingIssue);
+        }
+      }
+    }, [issueId, allIssues]);
+
+    if (loading) {
+      return <></>;
+    }
 
     return (
-      <s-admin-action heading={i18n.translate("name")}>
+      <s-admin-action
+        heading={i18n.translate(
+          isEditing ? "edit-issue-heading" : "create-issue-heading",
+        )}
+      >
         <s-button slot="primary-action" onClick={onSubmit}>
-          {i18n.translate("issue-create-button")}
+          {i18n.translate(
+            isEditing ? "issue-save-button" : "issue-create-button",
+          )}
         </s-button>
-        <s-button slot="secondary-actions" onClick={close}>
+        <s-button
+          slot="secondary-actions"
+          onClick={() => {
+            close();
+          }}
+        >
           {i18n.translate("issue-cancel-button")}
         </s-button>
         <s-text-field
