@@ -90,6 +90,13 @@ api_version = "2026-10"
   topics = ["orders/create"]
   uri = "pubsub://ltc-we:LTC-webhooks"
 
+
+[product.metafields.app.issues]
+type = "json"
+name = "Issue Tracker"
+description = "Tracks issues logged for this product"
+access.admin = "merchant_read_write"
+
 [auth]
 redirect_urls = [ "https://example.com/api/auth" ]
 
