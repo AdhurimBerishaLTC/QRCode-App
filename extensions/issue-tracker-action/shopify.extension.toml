@@ -11,6 +11,10 @@ uid = "799a1dec-3979-a563-117b-d4e5cd6b9808fbc17d0d"
 module = "./src/ActionExtension.jsx"
 target = "admin.product-details.action.render"
 
+# Hide this action in More actions when the product has only one variant.
+[extensions.targeting.should_render]
+module = "./src/condition/shouldRender.js"
+
 
 # Valid extension targets:
 

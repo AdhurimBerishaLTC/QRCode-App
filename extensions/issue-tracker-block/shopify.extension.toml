@@ -12,6 +12,8 @@ module = "./src/BlockExtension.jsx"
 target = "admin.product-details.block.render"
 
 
+
+
 # Valid extension targets:
 
 # Abandoned checkout detail page

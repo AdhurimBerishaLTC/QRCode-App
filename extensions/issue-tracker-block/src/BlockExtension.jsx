@@ -2,7 +2,7 @@ import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useEffect, useMemo, useState } from "preact/hooks";
 
-import { getIssues, updateIssues } from "./utils";
+import { getIssues, getVariantsCount, updateIssues } from "./utils";
 
 /**
  * @typedef {import("./utils").Issue} Issue
@@ -33,6 +33,7 @@ function Extension() {
     /** @type {Issue[]} */ ([]),
   );
   const [currentPage, setCurrentPage] = useState(1);
+  const [shouldRender, setShouldRender] = useState(false);
 
   const issuesCount = issues.length;
   const totalPages = Math.max(1, Math.ceil(issuesCount / PAGE_SIZE));
@@ -49,11 +50,15 @@ function Extension() {
 
     (async () => {
       try {
-        const parsedIssues = await getIssues(productId);
+        const [parsedIssues, variantCount] = await Promise.all([
+          getIssues(productId),
+          getVariantsCount(productId),
+        ]);
         if (!cancelled) {
           const snapshot = parsedIssues.map((issue) => ({ ...issue }));
           setIssues(snapshot);
           setInitialIssues(snapshot.map((issue) => ({ ...issue })));
+          setShouldRender(variantCount > 1);
         }
       } finally {
         if (!cancelled) {
@@ -102,158 +107,149 @@ function Extension() {
     navigation?.navigate("extension:issue-tracker-action");
   };
 
-  let body;
-  if (loading) {
-    body = (
-      <s-stack direction="inline" padding="base">
-        <s-spinner accessibilityLabel={i18n.translate("name")} />
-      </s-stack>
-    );
-  } else if (issuesCount === 0) {
-    body = (
-      <s-stack direction="block" gap="base">
-        <s-text>{i18n.translate("no-issues-text")}</s-text>
-        <s-button variant="primary" onClick={openCreateIssue}>
-          {i18n.translate("add-first-issue-button")}
-        </s-button>
-      </s-stack>
-    );
-  } else {
-    body = (
-      <s-stack direction="block" gap="base">
-        <s-form
-          id="issues-form"
-          onSubmit={(event) => {
-            if (!productId) return;
-            event.waitUntil?.(
-              updateIssues(productId, issues).then(() => {
-                setInitialIssues(issues.map((issue) => ({ ...issue })));
-              }),
-            );
-          }}
-          onReset={() => {
-            setIssues(initialIssues.map((issue) => ({ ...issue })));
-          }}
-        >
-          <s-box overflow="hidden" maxBlockSize="0px" maxInlineSize="0px">
-            <s-text-field
-              name="issue-status-state"
-              label={i18n.translate("status-column-heading")}
-              labelAccessibilityVisibility="exclusive"
-              defaultValue={savedStatusKey}
-              value={currentStatusKey}
-            />
-          </s-box>
-          {paginatedIssues.length > 0 ? (
-            <>
-              <s-table
-                paginate
-                hasNextPage={currentPage < totalPages}
-                hasPreviousPage={currentPage > 1}
-                onNextPage={() => setCurrentPage(currentPage + 1)}
-                onPreviousPage={() => setCurrentPage(currentPage - 1)}
-              >
-                <s-table-header-row>
-                  <s-table-header listSlot="primary">
-                    {i18n.translate("issue-column-heading")}
-                  </s-table-header>
-                  <s-table-header>
-                    {i18n.translate("status-column-heading")}
-                  </s-table-header>
-                  <s-table-header></s-table-header>
-                </s-table-header-row>
-                <s-table-body>
-                  {paginatedIssues.map(
-                    ({ id, title, description, completed }) => (
-                      <s-table-row key={id}>
-                        <s-table-cell>
-                          <s-stack direction="block" gap="small-100">
-                            <s-heading accessibilityRole="presentation">
-                              {title}
-                            </s-heading>
-                            <s-text color="subdued">{description}</s-text>
-                          </s-stack>
-                        </s-table-cell>
-                        <s-table-cell>
-                          <s-select
-                            name={`issue-status-${id}`}
-                            labelAccessibilityVisibility="exclusive"
-                            label={i18n.translate("select-label")}
-                            value={completed ? "completed" : "todo"}
-                            onChange={(event) =>
-                              handleChange(id, event.currentTarget.value)
-                            }
-                          >
-                            <s-option value="todo">
-                              {i18n.translate("option-todo")}
-                            </s-option>
-                            <s-option value="completed">
-                              {i18n.translate("option-completed")}
-                            </s-option>
-                          </s-select>
-                        </s-table-cell>
-                        <s-table-cell>
-                          <s-button
-                            variant="tertiary"
-                            icon="edit"
-                            accessibilityLabel={i18n.translate(
-                              "edit-issue-button",
-                            )}
-                            onClick={() => {
-                              const url = `extension:issue-tracker-action?issueId=${id}`;
-                              navigation?.navigate(url);
-                            }}
-                          />
-                        </s-table-cell>
-                        <s-table-cell>
-                          <s-button
-                            variant="tertiary"
-                            icon="delete"
-                            accessibilityLabel={i18n.translate(
-                              "delete-issue-button",
-                            )}
-                            onClick={() => handleDelete(id)}
-                          />
-                        </s-table-cell>
-                      </s-table-row>
-                    ),
-                  )}
-                </s-table-body>
-              </s-table>
-              <s-button
-                onClick={() => {
-                  const url = `extension:issue-tracker-action`;
-                  navigation?.navigate(url);
-                }}
-              >
-                {i18n.translate("add-issue-button")}
-              </s-button>
-            </>
-          ) : (
-            <>
-              <s-button
-                onClick={() => {
-                  const url = `extension:issue-tracker-action`;
-                  navigation?.navigate(url);
-                }}
-              >
-                {i18n.translate("add-issue-button")}
-              </s-button>
-            </>
-          )}
-        </s-form>
-      </s-stack>
-    );
-  }
+  const blockMarkup = loading ? (
+    <s-spinner></s-spinner>
+  ) : issuesCount === 0 ? (
+    <s-stack direction="block" gap="base">
+      <s-text>{i18n.translate("no-issues-text")}</s-text>
+      <s-button variant="primary" onClick={openCreateIssue}>
+        {i18n.translate("add-first-issue-button")}
+      </s-button>
+    </s-stack>
+  ) : (
+    <s-stack direction="block" gap="base">
+      <s-form
+        id="issues-form"
+        onSubmit={(event) => {
+          if (!productId) return;
+          event.waitUntil?.(
+            updateIssues(productId, issues).then(() => {
+              setInitialIssues(issues.map((issue) => ({ ...issue })));
+            }),
+          );
+        }}
+        onReset={() => {
+          setIssues(initialIssues.map((issue) => ({ ...issue })));
+        }}
+      >
+        <s-box overflow="hidden" maxBlockSize="0px" maxInlineSize="0px">
+          <s-text-field
+            name="issue-status-state"
+            label={i18n.translate("status-column-heading")}
+            labelAccessibilityVisibility="exclusive"
+            defaultValue={savedStatusKey}
+            value={currentStatusKey}
+          />
+        </s-box>
+        {paginatedIssues.length > 0 ? (
+          <>
+            <s-table
+              paginate
+              hasNextPage={currentPage < totalPages}
+              hasPreviousPage={currentPage > 1}
+              onNextPage={() => setCurrentPage(currentPage + 1)}
+              onPreviousPage={() => setCurrentPage(currentPage - 1)}
+            >
+              <s-table-header-row>
+                <s-table-header listSlot="primary">
+                  {i18n.translate("issue-column-heading")}
+                </s-table-header>
+                <s-table-header>
+                  {i18n.translate("status-column-heading")}
+                </s-table-header>
+                <s-table-header></s-table-header>
+              </s-table-header-row>
+              <s-table-body>
+                {paginatedIssues.map(
+                  ({ id, title, description, completed }) => (
+                    <s-table-row key={id}>
+                      <s-table-cell>
+                        <s-stack direction="block" gap="small-100">
+                          <s-heading accessibilityRole="presentation">
+                            {title}
+                          </s-heading>
+                          <s-text color="subdued">{description}</s-text>
+                        </s-stack>
+                      </s-table-cell>
+                      <s-table-cell>
+                        <s-select
+                          name={`issue-status-${id}`}
+                          labelAccessibilityVisibility="exclusive"
+                          label={i18n.translate("select-label")}
+                          value={completed ? "completed" : "todo"}
+                          onChange={(event) =>
+                            handleChange(id, event.currentTarget.value)
+                          }
+                        >
+                          <s-option value="todo">
+                            {i18n.translate("option-todo")}
+                          </s-option>
+                          <s-option value="completed">
+                            {i18n.translate("option-completed")}
+                          </s-option>
+                        </s-select>
+                      </s-table-cell>
+                      <s-table-cell>
+                        <s-button
+                          variant="tertiary"
+                          icon="edit"
+                          accessibilityLabel={i18n.translate(
+                            "edit-issue-button",
+                          )}
+                          onClick={() => {
+                            const url = `extension:issue-tracker-action?issueId=${id}`;
+                            navigation?.navigate(url);
+                          }}
+                        />
+                      </s-table-cell>
+                      <s-table-cell>
+                        <s-button
+                          variant="tertiary"
+                          icon="delete"
+                          accessibilityLabel={i18n.translate(
+                            "delete-issue-button",
+                          )}
+                          onClick={() => handleDelete(id)}
+                        />
+                      </s-table-cell>
+                    </s-table-row>
+                  ),
+                )}
+              </s-table-body>
+            </s-table>
+            <s-button
+              onClick={() => {
+                const url = `extension:issue-tracker-action`;
+                navigation?.navigate(url);
+              }}
+            >
+              {i18n.translate("add-issue-button")}
+            </s-button>
+          </>
+        ) : (
+          <>
+            <s-button
+              onClick={() => {
+                const url = `extension:issue-tracker-action`;
+                navigation?.navigate(url);
+              }}
+            >
+              {i18n.translate("add-issue-button")}
+            </s-button>
+          </>
+        )}
+      </s-form>
+    </s-stack>
+  );
 
   return (
     <s-admin-block
       heading={i18n.translate("name")}
       collapsedSummary={
-        loading ? undefined : issuesCount ? String(issuesCount) : "No issues"
+        !shouldRender ? i18n.translate("collapsed-summary") : undefined
       }
     >
-      {body}
+      {shouldRender ? blockMarkup : null}
     </s-admin-block>
   );
 }

@@ -10,6 +10,7 @@
  *   data?: {
  *     product?: {
  *       metafield?: { value?: string | null } | null
+ *       variantsCount?: { count?: number } | null
  *     } | null
  *   } | null
  * }} ProductIssuesResponse
@@ -92,4 +93,23 @@ async function makeGraphQLQuery(query, variables) {
   }
 
   return await res.json();
+}
+
+/**
+ * @param {string} id
+ * @returns {Promise<number>}
+ */
+export async function getVariantsCount(id) {
+  const productData = await makeGraphQLQuery(
+    `query Product($id: ID!) {
+      product(id: $id) {
+        variantsCount {
+          count
+        }
+      }
+    }`,
+    { id },
+  );
+
+  return productData?.data?.product?.variantsCount?.count ?? 0;
 }
