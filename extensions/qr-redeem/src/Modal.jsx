@@ -1,6 +1,7 @@
 import "@shopify/ui-extensions/preact";
 import { render } from "preact";
 import { useEffect, useRef, useState } from "preact/hooks";
+import { customerLabel, customerNumericId, searchCustomers } from "./FetchCustomer";
 import { fetchQrCode, parseQrHandle, variantNumericId } from "./FetchQrCode";
 
 /**
@@ -14,6 +15,7 @@ import { fetchQrCode, parseQrHandle, variantNumericId } from "./FetchQrCode";
  *   price: string | null,
  *   imageUrl: string | null
  * }} PendingItem
+ * @typedef {import("./FetchCustomer").CustomerNode} CustomerNode
  */
 
 export default async () => {
@@ -27,13 +29,30 @@ function cameraScanner() {
 function Modal() {
   const { i18n } = shopify;
   const scanner = cameraScanner();
+  const [hasCustomer, setHasCustomer] = useState(
+    Boolean(shopify.cart.current.value?.customer?.id),
+  );
   const [status, setStatus] = useState("scanning");
   const [message, setMessage] = useState("");
   const [quantity, setQuantity] = useState(1);
   const [pendingItem, setPendingItem] = useState(
     /** @type {PendingItem | null} */ (null),
   );
+  const [customerResults, setCustomerResults] = useState(
+    /** @type {CustomerNode[]} */ ([]),
+  );
+  const [customerQuery, setCustomerQuery] = useState("");
+  const [searchingCustomers, setSearchingCustomers] = useState(false);
+  const [attachingCustomer, setAttachingCustomer] = useState(false);
+  const [customerMessage, setCustomerMessage] = useState("");
   const lastScanned = useRef("");
+
+  useEffect(() => {
+    const unsubscribe = shopify.cart.current.subscribe((cart) => {
+      setHasCustomer(Boolean(cart?.customer?.id));
+    });
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     scanner.showCameraScanner();
@@ -99,6 +118,9 @@ function Modal() {
           imageUrl,
         });
         setQuantity(1);
+        setCustomerResults([]);
+        setCustomerQuery("");
+        setCustomerMessage("");
         setStatus("confirm");
       } catch {
         setMessage(i18n.translate("add_failed"));
@@ -112,8 +134,88 @@ function Modal() {
     };
   }, []);
 
+  /**
+   * @param {{ currentTarget?: { value?: string } | null, target?: { value?: string } | null } | null | undefined} event
+   */
+  const fieldValue = (event) => {
+    const el = event?.currentTarget ?? event?.target;
+    return String(el?.value ?? "").trim();
+  };
+
+  /**
+   * @param {string} rawQuery
+   */
+  const runCustomerSearch = async (rawQuery) => {
+    const query = String(rawQuery ?? "").trim();
+    if (!query) {
+      setCustomerResults([]);
+      setCustomerMessage("");
+      return;
+    }
+
+    setSearchingCustomers(true);
+    setCustomerMessage("");
+
+    try {
+      const nodes = await searchCustomers(query);
+      setCustomerResults(nodes);
+      if (!nodes.length) {
+        setCustomerMessage(i18n.translate("no_customers"));
+      }
+    } catch (error) {
+      setCustomerResults([]);
+      const detail = error instanceof Error ? error.message : "";
+      if (/access denied|read_customers|access scope/i.test(detail)) {
+        setCustomerMessage(i18n.translate("search_access_denied"));
+      } else if (detail) {
+        setCustomerMessage(detail);
+      } else {
+        setCustomerMessage(i18n.translate("search_failed"));
+      }
+    } finally {
+      setSearchingCustomers(false);
+    }
+  };
+
+  /**
+   * @param {{ currentTarget?: { value?: string } | null, target?: { value?: string } | null }} event
+   */
+  const handleCustomerInput = (event) => {
+    setCustomerQuery(fieldValue(event));
+  };
+
+  /**
+   * @param {{ currentTarget?: { value?: string } | null, target?: { value?: string } | null }} event
+   */
+  const handleCustomerSearch = (event) => {
+    const query = fieldValue(event) || customerQuery;
+    setCustomerQuery(query);
+    runCustomerSearch(query);
+  };
+
+  /** @param {CustomerNode} customer */
+  const attachCustomer = async (customer) => {
+    const id = customerNumericId(customer);
+    if (!id) {
+      setCustomerMessage(i18n.translate("attach_failed"));
+      return;
+    }
+
+    setAttachingCustomer(true);
+    setCustomerMessage("");
+
+    try {
+      await shopify.cart.setCustomer({ id });
+      setCustomerResults([]);
+    } catch {
+      setCustomerMessage(i18n.translate("attach_failed"));
+    } finally {
+      setAttachingCustomer(false);
+    }
+  };
+
   const handleConfirm = async () => {
-    if (!pendingItem) return;
+    if (!pendingItem || !hasCustomer) return;
     setStatus("loading");
 
     try {
@@ -149,6 +251,9 @@ function Modal() {
     setPendingItem(null);
     setQuantity(1);
     setMessage("");
+    setCustomerResults([]);
+    setCustomerQuery("");
+    setCustomerMessage("");
     setStatus("scanning");
     scanner.showCameraScanner();
   };
@@ -199,7 +304,61 @@ function Modal() {
               {pendingItem?.price}
             </s-text>
 
-            <s-button variant="primary" onClick={handleConfirm}>
+            {hasCustomer ? (
+              <s-banner
+                heading={i18n.translate("customer_attached")}
+                tone="success"
+              />
+            ) : (
+              <s-stack direction="block" gap="small">
+                <s-banner
+                  heading={i18n.translate("needs_customer")}
+                  tone="warning"
+                />
+                <s-search-field
+                  placeholder={i18n.translate("search_customer")}
+                  value={customerQuery}
+                  disabled={searchingCustomers || attachingCustomer}
+                  onInput={handleCustomerInput}
+                  onChange={handleCustomerSearch}
+                />
+                <s-button
+                  variant="secondary"
+                  disabled={
+                    searchingCustomers ||
+                    attachingCustomer ||
+                    !customerQuery.trim()
+                  }
+                  onClick={() => runCustomerSearch(customerQuery)}
+                >
+                  {i18n.translate("search_customer_button")}
+                </s-button>
+                {searchingCustomers ? (
+                  <s-text>{i18n.translate("looking_up")}</s-text>
+                ) : null}
+                {customerMessage ? <s-text>{customerMessage}</s-text> : null}
+                {customerResults.map((customer) => (
+                  <s-clickable
+                    key={customer.id}
+                    disabled={attachingCustomer}
+                    onClick={() => attachCustomer(customer)}
+                  >
+                    <s-stack direction="block" gap="none">
+                      <s-text>{customerLabel(customer)}</s-text>
+                      <s-text>
+                        {customer.defaultEmailAddress?.emailAddress || ""}
+                      </s-text>
+                    </s-stack>
+                  </s-clickable>
+                ))}
+              </s-stack>
+            )}
+
+            <s-button
+              variant="primary"
+              disabled={!hasCustomer}
+              onClick={handleConfirm}
+            >
               {i18n.translate("add_to_cart")}
             </s-button>
 

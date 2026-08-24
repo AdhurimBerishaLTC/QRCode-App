@@ -13,6 +13,12 @@ declare module './src/Modal.jsx' {
 }
 
 //@ts-ignore
+declare module './src/FetchCustomer.js' {
+  const shopify: import('@shopify/ui-extensions/pos.home.modal.render').Api;
+  const globalThis: { shopify: typeof shopify };
+}
+
+//@ts-ignore
 declare module './src/FetchQrCode.js' {
   const shopify: import('@shopify/ui-extensions/pos.home.modal.render').Api;
   const globalThis: { shopify: typeof shopify };
