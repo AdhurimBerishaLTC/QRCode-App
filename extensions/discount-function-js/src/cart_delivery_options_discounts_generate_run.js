@@ -2,8 +2,8 @@ import {
   DeliveryDiscountSelectionStrategy,
   DiscountClass,
 } from "../generated/api";
-import { freeShippingMessage, languageCode } from "./localization";
-import { isQrDiscountBlocked, isQrScan } from "./qrEligibility";
+import { passesDiscountEligibility } from "./qrEligibility";
+import { parseFunctionConfiguration } from "./parseFunctionConfiguration";
 
 /**
  * @typedef {import("../generated/api").DeliveryInput} RunInput
@@ -11,32 +11,13 @@ import { isQrDiscountBlocked, isQrScan } from "./qrEligibility";
  */
 
 /**
- * @param {{ jsonValue?: { freeShipping?: boolean } | null } | null | undefined} metafield
- * @returns {boolean}
- */
-function isFreeShippingEnabled(metafield) {
-  return metafield?.jsonValue?.freeShipping !== false;
-}
-
-/**
  * @param {RunInput} input
  * @returns {CartDeliveryOptionsDiscountsGenerateRunResult}
  */
 export function cartDeliveryOptionsDiscountsGenerateRun(input) {
-  if (!isQrScan(input.cart)) {
-    return { operations: [] };
-  }
+  const config = parseFunctionConfiguration(input.discount.metafield);
 
-  const customer = input.cart.buyerIdentity?.customer;
-  if (!customer) {
-    return { operations: [] };
-  }
-
-  if (isQrDiscountBlocked(input.cart)) {
-    return { operations: [] };
-  }
-
-  if (!isFreeShippingEnabled(input.discount.metafield)) {
+  if (!passesDiscountEligibility(input.cart, config)) {
     return { operations: [] };
   }
 
@@ -45,6 +26,8 @@ export function cartDeliveryOptionsDiscountsGenerateRun(input) {
     return { operations: [] };
   }
 
+  const { deliveryPercentage } = config;
+
   const hasShippingDiscountClass = input.discount.discountClasses.includes(
     DiscountClass.Shipping,
   );
@@ -52,30 +35,32 @@ export function cartDeliveryOptionsDiscountsGenerateRun(input) {
     return { operations: [] };
   }
 
-  return {
-    operations: [
-      {
-        deliveryDiscountsAdd: {
-          candidates: [
-            {
-              message: freeShippingMessage(languageCode(input)),
-              targets: [
-                {
-                  deliveryGroup: {
-                    id: firstDeliveryGroup.id,
-                  },
-                },
-              ],
-              value: {
-                percentage: {
-                  value: 100,
+  const operations = [];
+
+  if (hasShippingDiscountClass && deliveryPercentage > 0) {
+    operations.push({
+      deliveryDiscountsAdd: {
+        candidates: [
+          {
+            message: `${deliveryPercentage}% OFF DELIVERY`,
+            targets: [
+              {
+                deliveryGroup: {
+                  id: firstDeliveryGroup.id,
                 },
               },
+            ],
+            value: {
+              percentage: {
+                value: deliveryPercentage,
+              },
             },
-          ],
-          selectionStrategy: DeliveryDiscountSelectionStrategy.All,
-        },
+          },
+        ],
+        selectionStrategy: DeliveryDiscountSelectionStrategy.All,
       },
-    ],
-  };
+    });
+  }
+
+  return { operations };
 }

@@ -7,7 +7,9 @@
         "discountClasses": [
           "SHIPPING"
         ],
-        "metafield": null
+        "metafield": {
+          "value": "{\"cartLinePercentage\":20,\"orderPercentage\":10,\"deliveryPercentage\":100,\"collectionIds\":[]}"
+        }
       },
       "cart": {
         "attribute": {
@@ -38,7 +40,7 @@
           "deliveryDiscountsAdd": {
             "candidates": [
               {
-                "message": "SCAN QR — LIVRAISON GRATUITE",
+                "message": "100% OFF DELIVERY",
                 "targets": [
                   {
                     "deliveryGroup": {

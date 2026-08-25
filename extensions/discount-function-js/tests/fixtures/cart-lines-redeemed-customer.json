@@ -23,7 +23,13 @@
                 "amount": "100.0"
               }
             },
-            "qrSrc": null
+            "qrSrc": null,
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": {
+                "inAnyCollection": true
+              }
+            }
           }
         ],
         "retailLocation": null

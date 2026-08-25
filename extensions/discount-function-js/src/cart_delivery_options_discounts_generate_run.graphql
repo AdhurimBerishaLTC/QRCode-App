@@ -23,8 +23,8 @@ query DeliveryInput {
   }
   discount {
     discountClasses
-    metafield(namespace: "$app:qr-discount", key: "function-configuration") {
-      jsonValue
+    metafield(namespace: "$app", key: "function-configuration") {
+      value
     }
   }
   localization {

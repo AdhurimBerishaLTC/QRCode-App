@@ -8,9 +8,7 @@
           "SHIPPING"
         ],
         "metafield": {
-          "jsonValue": {
-            "freeShipping": false
-          }
+          "value": "{\"cartLinePercentage\":0,\"orderPercentage\":0,\"deliveryPercentage\":0,\"collectionIds\":[]}"
         }
       },
       "cart": {

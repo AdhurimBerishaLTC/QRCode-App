@@ -21,7 +21,13 @@
                 "amount": "100.0"
               }
             },
-            "qrSrc": null
+            "qrSrc": null,
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": {
+                "inAnyCollection": true
+              }
+            }
           }
         ],
         "retailLocation": null
@@ -30,7 +36,9 @@
         "discountClasses": [
           "ORDER"
         ],
-        "metafield": null
+        "metafield": {
+          "value": "{\"cartLinePercentage\":0,\"orderPercentage\":10,\"collectionIds\":[]}"
+        }
       },
       "localization": {
         "language": {
@@ -44,7 +52,7 @@
           "orderDiscountsAdd": {
             "candidates": [
               {
-                "message": "QR SCAN — 10% OFF",
+                "message": "10% OFF ORDER",
                 "targets": [
                   {
                     "orderSubtotal": {

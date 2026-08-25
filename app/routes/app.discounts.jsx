@@ -3,9 +3,9 @@ import { boundary } from "@shopify/shopify-app-react-router/server";
 import { authenticate } from "../shopify.server";
 
 export const FUNCTION_HANDLE = "discount-function-js";
-const METAFIELD_NAMESPACE = "$app:qr-discount";
+const METAFIELD_NAMESPACE = "$app";
 const METAFIELD_KEY = "function-configuration";
-const DEFAULT_TITLE = "QR Scan POS";
+const DEFAULT_TITLE = "QR Scan";
 
 export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
@@ -65,7 +65,7 @@ export const action = async ({ request }) => {
           title: DEFAULT_TITLE,
           functionHandle: FUNCTION_HANDLE,
           startsAt: new Date().toISOString(),
-          discountClasses: ["ORDER", "SHIPPING"],
+          discountClasses: ["PRODUCT", "ORDER", "SHIPPING"],
           context: { all: "ALL" },
           combinesWith: {
             orderDiscounts: true,
@@ -78,8 +78,11 @@ export const action = async ({ request }) => {
               key: METAFIELD_KEY,
               type: "json",
               value: JSON.stringify({
-                orderPercent: 10,
-                freeShipping: true,
+                cartLinePercentage: 0,
+                orderPercentage: 10,
+                deliveryPercentage: 100,
+                collectionIds: [],
+                requireQrScan: true,
               }),
             },
           ],
@@ -137,10 +140,15 @@ export default function DiscountsIndex() {
       {discounts.length === 0 && !created ? (
         <s-section>
           <s-paragraph>
-            Create an automatic QR scan discount (10% off, optional free
-            shipping). It uses the same function as the web funnel and applies
-            on POS Pro when the cart has <s-text fontWeight="bold">src=qr</s-text>{" "}
-            and a customer attached.
+            Create an automatic QR scan discount. It applies when the cart has{" "}
+            <s-text fontWeight="bold">src=qr</s-text>, a logged-in customer, and
+            uses the function configuration metafield under{" "}
+            <s-text fontWeight="bold">$app / function-configuration</s-text>.
+          </s-paragraph>
+          <s-paragraph>
+            If you created a discount from the Admin UI extension instead, that
+            is usually a code discount — enter its code at checkout, scan a QR
+            code first, log in, and add a product from your configured collection.
           </s-paragraph>
         </s-section>
       ) : (

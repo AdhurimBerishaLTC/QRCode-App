@@ -21,7 +21,13 @@
                 "amount": "100.0"
               }
             },
-            "qrSrc": null
+            "qrSrc": null,
+            "merchandise": {
+              "__typename": "ProductVariant",
+              "product": {
+                "inAnyCollection": true
+              }
+            }
           }
         ],
         "retailLocation": null
@@ -30,7 +36,9 @@
         "discountClasses": [
           "PRODUCT"
         ],
-        "metafield": null
+        "metafield": {
+          "value": "{\"cartLinePercentage\":20,\"orderPercentage\":0,\"collectionIds\":[]}"
+        }
       },
       "localization": {
         "language": {
@@ -39,7 +47,30 @@
       }
     },
     "output": {
-      "operations": []
+      "operations": [
+        {
+          "productDiscountsAdd": {
+            "candidates": [
+              {
+                "message": "20% OFF PRODUCT",
+                "targets": [
+                  {
+                    "cartLine": {
+                      "id": "gid://shopify/CartLine/0"
+                    }
+                  }
+                ],
+                "value": {
+                  "percentage": {
+                    "value": 20
+                  }
+                }
+              }
+            ],
+            "selectionStrategy": "FIRST"
+          }
+        }
+      ]
     }
   }
 }

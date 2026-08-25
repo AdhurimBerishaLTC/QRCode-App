@@ -1,4 +1,4 @@
-query CartInput {
+query CartInput($collectionIds: [ID!]) {
   cart {
     attribute(key: "src") {
       value
@@ -27,12 +27,20 @@ query CartInput {
           amount
         }
       }
+      merchandise {
+        __typename
+        ... on ProductVariant {
+          product {
+            inAnyCollection(ids: $collectionIds)
+          }
+        }
+      }
     }
   }
   discount {
     discountClasses
-    metafield(namespace: "$app:qr-discount", key: "function-configuration") {
-      jsonValue
+    metafield(namespace: "$app", key: "function-configuration") {
+      value
     }
   }
   localization {

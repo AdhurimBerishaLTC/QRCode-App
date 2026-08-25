@@ -49,3 +49,24 @@ export function isQrDiscountBlocked(cart) {
 
   return identity?.isAuthenticated !== true;
 }
+
+/**
+ * @param {QrCart | null | undefined} cart
+ * @param {{ requireQrScan?: boolean }} config
+ * @returns {boolean}
+ */
+export function passesDiscountEligibility(cart, config) {
+  if (!config.requireQrScan) {
+    return true;
+  }
+
+  if (!isQrScan(cart)) {
+    return false;
+  }
+
+  if (isQrDiscountBlocked(cart)) {
+    return false;
+  }
+
+  return true;
+}

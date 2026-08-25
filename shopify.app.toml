@@ -97,6 +97,12 @@ name = "Issue Tracker"
 description = "Tracks issues logged for this product"
 access.admin = "merchant_read_write"
 
+[discount.metafields.app.function-configuration]
+type = "json"
+name = "Function configuration"
+access.admin = "merchant_read_write"
+access.storefront = "none"
+
 [auth]
 redirect_urls = [ "https://example.com/api/auth" ]
 
