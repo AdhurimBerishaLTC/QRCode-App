@@ -7,7 +7,7 @@ embedded = true
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,read_orders,read_customers,write_customers,write_metaobjects,write_metaobject_definitions,read_metaobject_definitions,write_app_proxy,write_discounts,write_cart_transforms,write_payment_customizations,customer_read_orders,customer_write_orders, write_pixels, read_pixels, read_customer_events, read_products, customer_read_customers,customer_read_orders"
+scopes = "write_products,read_orders,read_customers,write_customers,write_metaobjects,write_metaobject_definitions,read_metaobject_definitions,write_app_proxy,write_discounts,write_cart_transforms,write_payment_customizations,customer_read_orders,customer_write_orders, write_pixels, read_pixels, read_customer_events, read_products, customer_read_customers,customer_read_orders, customer_write_customers"
 
 [product.metafields.app.demo_info]
 type = "single_line_text_field"
@@ -102,6 +102,13 @@ type = "json"
 name = "Function configuration"
 access.admin = "merchant_read_write"
 access.storefront = "none"
+
+[customer.metafields.app.nickname]
+type = "single_line_text_field"
+name = "The customer's preferred name"
+description = "The customer's preferred nickname for personalization"
+access.customer_account = "read_write"
+access.admin = "merchant_read"
 
 [auth]
 redirect_urls = [ "https://example.com/api/auth" ]
