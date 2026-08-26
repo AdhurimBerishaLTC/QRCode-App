@@ -52,7 +52,7 @@
           "productDiscountsAdd": {
             "candidates": [
               {
-                "message": "20% OFF PRODUCT",
+                "message": "QR SCAN — 20% OFF PRODUCT",
                 "targets": [
                   {
                     "cartLine": {

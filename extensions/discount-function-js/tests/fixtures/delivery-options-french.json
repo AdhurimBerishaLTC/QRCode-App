@@ -40,7 +40,7 @@
           "deliveryDiscountsAdd": {
             "candidates": [
               {
-                "message": "100% OFF DELIVERY",
+                "message": "SCAN QR — LIVRAISON GRATUITE",
                 "targets": [
                   {
                     "deliveryGroup": {

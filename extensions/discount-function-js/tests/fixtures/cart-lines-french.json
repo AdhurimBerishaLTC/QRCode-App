@@ -52,7 +52,7 @@
           "orderDiscountsAdd": {
             "candidates": [
               {
-                "message": "10% OFF ORDER",
+                "message": "SCAN QR — 10 % DE RÉDUCTION",
                 "targets": [
                   {
                     "orderSubtotal": {

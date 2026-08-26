@@ -6,6 +6,11 @@ import {
 
 import { passesDiscountEligibility } from "./qrEligibility";
 import { parseFunctionConfiguration } from "./parseFunctionConfiguration";
+import {
+  languageCode,
+  orderDiscountMessage,
+  productDiscountMessage,
+} from "./localization";
 
 /**
  * @typedef {import("../generated/api").CartInput} RunInput
@@ -28,6 +33,7 @@ export function cartLinesDiscountsGenerateRun(input) {
   }
 
   const { cartLinePercentage, orderPercentage, collectionIds } = config;
+  const language = languageCode(input);
 
   const hasOrderDiscountClass = input.discount.discountClasses.includes(
     DiscountClass.Order,
@@ -63,7 +69,7 @@ export function cartLinesDiscountsGenerateRun(input) {
         productDiscountsAdd: {
           candidates: [
             {
-              message: `${cartLinePercentage}% OFF PRODUCT`,
+              message: productDiscountMessage(language, cartLinePercentage),
               targets: cartLineTargets,
               value: {
                 percentage: {
@@ -84,7 +90,7 @@ export function cartLinesDiscountsGenerateRun(input) {
       orderDiscountsAdd: {
         candidates: [
           {
-            message: `${orderPercentage}% OFF ORDER`,
+            message: orderDiscountMessage(language, orderPercentage),
             targets: [
               {
                 orderSubtotal: {

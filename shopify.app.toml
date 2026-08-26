@@ -24,6 +24,7 @@ description = "Tracks whether a customer has already redeemed the QR discount"
 
   [customer.metafields.app.qr_discount_redeemed.access]
   admin = "merchant_read_write"
+  customer_account = "read"
 
 [metaobjects.app.product_qr]
 name = "QR Code"

@@ -4,6 +4,7 @@ import {
 } from "../generated/api";
 import { passesDiscountEligibility } from "./qrEligibility";
 import { parseFunctionConfiguration } from "./parseFunctionConfiguration";
+import { deliveryDiscountMessage, languageCode } from "./localization";
 
 /**
  * @typedef {import("../generated/api").DeliveryInput} RunInput
@@ -27,6 +28,7 @@ export function cartDeliveryOptionsDiscountsGenerateRun(input) {
   }
 
   const { deliveryPercentage } = config;
+  const language = languageCode(input);
 
   const hasShippingDiscountClass = input.discount.discountClasses.includes(
     DiscountClass.Shipping,
@@ -42,7 +44,7 @@ export function cartDeliveryOptionsDiscountsGenerateRun(input) {
       deliveryDiscountsAdd: {
         candidates: [
           {
-            message: `${deliveryPercentage}% OFF DELIVERY`,
+            message: deliveryDiscountMessage(language, deliveryPercentage),
             targets: [
               {
                 deliveryGroup: {

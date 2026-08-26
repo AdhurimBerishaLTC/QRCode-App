@@ -33,11 +33,36 @@ const prisma = new PrismaClient();
 const pubSubClient = new PubSub(projectId ? { projectId } : undefined);
 const subscription = pubSubClient.subscription(subscriptionNameOrId);
 
+function hasQrDiscountTitle(payload) {
+  return (payload?.discount_applications ?? []).some((application) => {
+    const title = String(application?.title ?? "").toLowerCase();
+    return title.includes("qr scan") || title.includes("scan qr");
+  });
+}
+
+function hasQrSrcNoteAttribute(payload) {
+  return (payload?.note_attributes ?? []).some(
+    (attribute) =>
+      String(attribute?.name ?? "").toLowerCase() === "src" &&
+      String(attribute?.value ?? "").toLowerCase() === "qr",
+  );
+}
+
+function hasQrSrcLineProperty(payload) {
+  return (payload?.line_items ?? []).some((item) =>
+    (item?.properties ?? []).some(
+      (property) =>
+        String(property?.name ?? "").toLowerCase() === "src" &&
+        String(property?.value ?? "").toLowerCase() === "qr",
+    ),
+  );
+}
+
 function hasQrDiscount(payload) {
-  return (payload?.discount_applications ?? []).some((application) =>
-    String(application?.title ?? "")
-      .toLowerCase()
-      .includes("qr scan"),
+  return (
+    hasQrDiscountTitle(payload) ||
+    hasQrSrcNoteAttribute(payload) ||
+    hasQrSrcLineProperty(payload)
   );
 }
 
@@ -103,6 +128,7 @@ async function markQrDiscountRedeemed(shop, customerId) {
           metafields: [
             {
               ownerId: customerId,
+              namespace: "$app",
               key: "qr_discount_redeemed",
               type: "boolean",
               value: "true",

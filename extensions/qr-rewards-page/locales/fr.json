@@ -1,0 +1,10 @@
+{
+  "pageHeading": "Récompenses QR",
+  "loading": "Chargement",
+  "bannerHeading": "Réduction QR",
+  "redeemed": "Vous avez déjà utilisé votre réduction QR.",
+  "available": "Votre réduction QR est encore disponible.",
+  "purchaseHeading": "Achat QR {{orderName}}",
+  "quantity": "Qté {{quantity}}",
+  "empty": "Aucune activité QR pour le moment."
+}

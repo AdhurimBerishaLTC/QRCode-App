@@ -1,0 +1,10 @@
+{
+  "pageHeading": "QR Rewards",
+  "loading": "Loading",
+  "bannerHeading": "QR discount",
+  "redeemed": "You've already redeemed your QR discount.",
+  "available": "Your QR discount is still available.",
+  "purchaseHeading": "QR purchase {{orderName}}",
+  "quantity": "Qty {{quantity}}",
+  "empty": "No QR activity yet."
+}
